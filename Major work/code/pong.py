@@ -23,13 +23,13 @@ mid_line_rect = mid_line_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGH
 mid_line_surf.fill('white')
 
 player1_surf = pygame.Surface((10, 115))
-player1_surf.fill('white')
+player1_surf.fill('blue4')
 player1_rect = player1_surf.get_frect(center = (WINDOW_WIDTH -1180, WINDOW_HEIGHT / 2))
 player1_direction = pygame.math.Vector2(0, 0)
 player1_points = 0
 
 player2_surf = pygame.Surface((10, 115))
-player2_surf.fill('white')
+player2_surf.fill('blue4')
 player2_rect = player2_surf.get_frect(center = (WINDOW_WIDTH -100, WINDOW_HEIGHT / 2))
 player2_direction = pygame.math.Vector2(0, 0)
 player2_points = 0
@@ -44,7 +44,7 @@ player1_win_rect = player1_win_text.get_frect(center = (WINDOW_WIDTH / 2, WINDOW
 player2_win_text = player_font.render('Player 2 wins!', True, 'white')
 player2_win_rect = player2_win_text.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
 
-player_speed = 10
+player_speed = 6
 
 
 while running:
@@ -64,25 +64,11 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-            if event.key == pygame.K_s:
-                player1_direction.y = 0.5
-            if event.key == pygame.K_w:
-                player1_direction.y = -0.5
-            if event.key == pygame.K_DOWN:
-                player2_direction.y = 0.5
-            if event.key == pygame.K_UP:
-                player2_direction.y = -0.5
 
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_s:
-                player1_direction.y = 0
-            if event.key == pygame.K_w:
-                player1_direction.y = 0
-            if event.key == pygame.K_DOWN:
-                player2_direction.y = 0
-            if event.key == pygame.K_UP:
-                player2_direction.y = 0
+    keys = pygame.key.get_pressed()
+    player1_direction.y = int(keys[pygame.K_s]) - int(keys[pygame.K_w])
 
+    player2_direction.y = int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])
 
     # game end/win
     if player1_points >= 11 and player2_points < player1_points - 1:
@@ -91,8 +77,6 @@ while running:
     if player2_points >= 11 and player1_points < player2_points - 1:
         running = False
         end = True
-        
-
 
     # player collisions
     if player1_rect.top < 0:
