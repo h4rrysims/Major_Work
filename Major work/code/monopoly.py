@@ -32,13 +32,16 @@ class AnimatedDice(pygame.sprite.Sprite):
                 self.rect.centery += 200 * dt
         else:
             self.kill()   # Remove the dice after animation
-            self.dice_timer()  # Notify that animation is complete
+            roll = random.randint(0, 5)
+            self.dice_timer(roll)  # Notify that animation is complete
+            
 
 
-def dice_timer():
-    global dice_rolling, dice
+def dice_timer(roll):
+    global dice_rolling, dice, last_roll
     dice_rolling = True
     dice = True
+    last_roll = roll
     
 pygame.init()
 
@@ -50,6 +53,7 @@ clock = pygame.time.Clock()
 middle = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
 dice_rolling = True
 dice = True
+last_roll = 0 
 
 board_surf = pygame.Surface((710, 700))
 board_surf.fill('darkseagreen2')
@@ -132,9 +136,8 @@ while running:
     screen.blit(surf6, rect6)
 
     if dice:
-        n = random.randint(0, 5)
-        sprite = roll_frames[n]
-        screen.blit(dice_surf, dice_rect)
+
+        screen.blit(roll_frames[last_roll], dice_rect)
 
 
     all_spaces.draw(screen)
