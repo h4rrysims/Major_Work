@@ -17,11 +17,16 @@ class AnimatedDice(pygame.sprite.Sprite):
         self.image = self.frames[self.frame_index]
         self.rect = self.image.get_frect(center=pos)
         self.dice_timer = dice_timer
+        self.time_passed = 0
 
     def update(self, dt):
         self.frame_index += 9 * dt 
+        self.time_passed += dt
         if self.frame_index < len(self.frames):
-            self.image = self.frames[int(self.frame_index)]
+            if self.time_passed > 0.1:
+                self.image = self.frames[random.randint(0, len(self.frames) - 1)]
+                self.time_passed -= 0.1
+
             self.rect.centery += -100 * dt
             if self.frame_index > 5:
                 self.rect.centery += 200 * dt
@@ -87,7 +92,7 @@ go_surf = pygame.image.load('images/go.png').convert_alpha()
 go_rect = go_surf.get_frect(topleft = (285, 10))
 go = Space(all_spaces, go_surf, go_rect)    
 
-roll_frames = [pygame.image.load(join('images', 'dice', f'{i}.png')).convert_alpha() for i in range(9)]
+roll_frames = [pygame.image.load(join('images', f'dice{i}.png')).convert_alpha() for i in range(1, 7)]
 
 
 
@@ -121,12 +126,14 @@ while running:
     # Draw the board and spaces
     screen.blit(board_surf, board_rect)
     screen.blit(surf2, rect2)
-    screen.blit(surf3, rect3)
+    screen.blit(surf3, rect3) 
     screen.blit(surf4, rect4)
     screen.blit(surf5, rect5)
     screen.blit(surf6, rect6)
 
     if dice:
+        n = random.randint(0, 5)
+        sprite = roll_frames[n]
         screen.blit(dice_surf, dice_rect)
 
 

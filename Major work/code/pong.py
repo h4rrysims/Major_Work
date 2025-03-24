@@ -16,7 +16,7 @@ ball_surf = pygame.Surface((10, 10))
 ball_surf.fill('white')
 ball_rect = ball_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
 ball_direction = pygame.math.Vector2(25, -10)
-ball_speed = 10
+ball_speed = 100
 
 mid_line_surf = pygame.Surface((10, 720))
 mid_line_rect = mid_line_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
@@ -44,7 +44,7 @@ player1_win_rect = player1_win_text.get_frect(center = (WINDOW_WIDTH / 2, WINDOW
 player2_win_text = player_font.render('Player 2 wins!', True, 'white')
 player2_win_rect = player2_win_text.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
 
-player_speed = 6
+player_speed = 60
 
 
 while running:
