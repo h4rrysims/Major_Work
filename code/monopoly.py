@@ -1,4 +1,5 @@
 import pygame
+import os
 from os.path import join
 import random 
 
@@ -114,6 +115,8 @@ def variable_setup():
     go1 = Space(all_spaces, go1_surf, go1_rect, (930, 80))
 
     player = Player(all_sprites)
+
+os.environ['SDL_AUDIODRIVER'] = 'dummy'
 pygame.init()
 
 # Setup 
