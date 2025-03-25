@@ -138,7 +138,6 @@ all_spaces = pygame.sprite.Group()
 
 variable_setup()
 
-roll_frames = [pygame.image.load(join('images', 'dice', f'dice{i}.png')).convert_alpha() for i in range(1, 7)]
 
 
 while running:
