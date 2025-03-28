@@ -12,33 +12,28 @@ class Space(pygame.sprite.Sprite):
 
     def get_position(self):
         return self.postion
-        
 
 class AnimatedDice(pygame.sprite.Sprite):
-    def __init__(self, frames, pos, groups, dice_timer):
+    def __init__(self, frames, pos, groups, dice_timer, roll_index):
         super().__init__(groups)
         self.frames = frames
         self.frame_index = 0
         self.image = self.frames[self.frame_index]
         self.rect = self.image.get_frect(center=pos)
         self.dice_timer = dice_timer
-        self.time_passed = 0
 
     def update(self, dt):
         self.frame_index += 9 * dt 
-        self.time_passed += dt
         if self.frame_index < len(self.frames):
-            if self.time_passed > 0.1:
-                self.image = self.frames[random.randint(0, len(self.frames) - 1)]
-                self.time_passed -= 0.1
-
+            self.image = self.frames[int(self.frame_index)]
             self.rect.centery += -100 * dt
             if self.frame_index > 5:
                 self.rect.centery += 200 * dt
+        
         else:
-            self.kill()   # Remove the dice after animation
+            self.kill()
             roll = random.randint(0, 5)
-            self.dice_timer(roll)  # Notify that animation is complete
+            self.dice_timer(roll) 
             
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups):
@@ -95,7 +90,7 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.traveling = False  # Stop moving once we reach the target
 
-    def move_to_square(self, space_index, space_position):
+    def move_to_square(self, space_position):
         if space_position[0] > 920:
             self.top_right = True
         elif space_position[1] > 635:
@@ -104,7 +99,6 @@ class Player(pygame.sprite.Sprite):
             self.bottom_left = True
         elif redo:
             self.top_left = True
-            print('yes')
         else:
             self.top_right = False
             self.bottom_right = False
@@ -123,7 +117,7 @@ def dice_timer(roll):
         redo = True 
         rolls -= 24
     print(rolls, (all_spaces.sprites()[rolls]).get_position())
-    player.move_to_square(roll+1, (all_spaces.sprites()[rolls]).get_position()) 
+    player.move_to_square((all_spaces.sprites()[rolls]).get_position()) 
     
 def variable_setup():
     global player, spots
@@ -176,7 +170,6 @@ def variable_setup():
 
     player = Player(all_sprites)
 
-os.environ['SDL_AUDIODRIVER'] = 'dummy'
 pygame.init()
 
 # Setup 
@@ -195,15 +188,15 @@ board_surf = pygame.Surface((703, 700))
 board_surf.fill('darkseagreen2')
 board_rect = board_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
 
-dice_surf = pygame.image.load(join('images', 'dice' ,'dice1.png')).convert_alpha()
-dice_rect = dice_surf.get_frect(center = middle)
+dices = [pygame.image.load(join('images', 'dice', f'dice{i}.png')).convert_alpha() for i in range(1, 7)]
+dice_rect = dices[1].get_frect(center = middle)
 
 all_sprites = pygame.sprite.Group()
 all_spaces = pygame.sprite.Group()
 
 variable_setup()
 
-roll_frames = [pygame.image.load(join('images', 'dice', f'dice{i}.png')).convert_alpha() for i in range(1, 7)]
+roll_frames = [pygame.image.load(join('images', 'dice', 'roll',  f'{i}.png')).convert_alpha() for i in range(0, 8)]
 
 while running:
     dt = clock.tick(60) / 1000
@@ -218,7 +211,7 @@ while running:
             if event.key == pygame.K_SPACE:
                 if dice_rolling:
                     dice = False
-                    AnimatedDice(roll_frames, middle, all_sprites, dice_timer)
+                    AnimatedDice(roll_frames, middle, all_sprites, dice_timer, last_roll)
                     dice_rolling = False
 
     # Update sprites
@@ -231,8 +224,7 @@ while running:
     screen.blit(board_surf, board_rect)
 
     if dice:
-        screen.blit(roll_frames[last_roll], dice_rect)
-
+        screen.blit(dices[last_roll], dice_rect)
 
     all_spaces.draw(screen)
     all_sprites.draw(screen)
