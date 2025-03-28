@@ -1,4 +1,5 @@
 import pygame
+import os
 from os.path import join
 import random 
 
@@ -8,6 +9,10 @@ class Space(pygame.sprite.Sprite):
         self.image = image
         self.rect = location
         self.postion = position
+
+    def get_position(self):
+        return self.postion
+        
 
 class AnimatedDice(pygame.sprite.Sprite):
     def __init__(self, frames, pos, groups, dice_timer):
@@ -39,10 +44,15 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, groups):
         super().__init__(groups)
         self.image = pygame.image.load(join('images','player.png')).convert_alpha()
-        self.rect = self.image.get_frect(center = (350, 80))
-        self.speed = 200
+        self.rect = self.image.get_frect(center = (355, 80))
+        self.speed = 50
         self.target_position = self.rect.center
         self.traveling = False 
+        self.space_location = 0
+        self.x_first = False
+        self.y_first = False
+        self.first = False
+
 
     def update(self, dt):  
         if self.traveling:
@@ -50,70 +60,127 @@ class Player(pygame.sprite.Sprite):
             direction = pygame.math.Vector2(int(target_x) - int(self.rect.centerx), int(target_y) - int(self.rect.centery))
             if direction.length() > 1:
                 direction.normalize_ip()
-                self.rect.centerx += direction.x * self.speed * dt
-                self.rect.centery += direction.y * self.speed * dt
+                if self.x_first:
+                    direction.x = 1
+                    direction.y = 0
+                    self.rect.centerx += direction.x * self.speed * dt
+                    if self.rect.centerx >= target_x:
+                        self.x_first = False
+                        direction.x = 1
+                else:
+                    self.rect.centerx += direction.x * self.speed * dt
+                    self.rect.centery += direction.y * self.speed * dt
+                if self.y_first:
+                    direction.y = 1
+                    direction.x = 0
+                    self.rect.centery += direction.y * self.speed * dt
+                    if self.rect.centery >= target_y:
+                        self.y_first = False
+                        direction.y = 1
+                else:
+                    self.rect.centerx += direction.x * self.speed * dt
+                    self.rect.centery += direction.y * self.speed * dt
+                if self.first:
+                    print(direction)
+                    direction.x = -1
+                    direction.y = 0
+                    self.rect.centerx += direction.x * self.speed * dt
+                    if self.rect.centerx <= target_x:
+                        self.first = False
+                        direction.x = -1
+                else:
+                    self.rect.centerx += direction.x * self.speed * dt
+                    self.rect.centery += direction.y * self.speed * dt
             else:
-                self.rect.center = self.target_position
                 self.traveling = False  # Stop moving once we reach the target
 
-    def move_to_square(self, square_index):
-        self.target_position = space_positions[square_index]
+    def move_to_square(self, space_index, space_position):
+        if space_position[0] > 920:
+            self.x_first = True
+            print('x')
+        else:
+            self.x_first = False
+        if space_position[1] > 635:
+            self.y_first = True
+            print('y')
+        else:
+            self.y_first + False
+        if space_position[0] < 360 and space_position[1] < 635:
+            self.first = True
+            self.y_first = False
+            self.x_first = False
+            print('boom')
+        else:
+            self.first = False
+        self.target_position = space_position
+        self.space_location += space_index
         self.traveling = True
-
+        
 def dice_timer(roll):
-    global dice_rolling, dice, last_roll, travel
+    global dice_rolling, dice, last_roll, rolls
     dice_rolling = True
     dice = True
     last_roll = roll
-    travel = True
-    player.move_to_square(roll) 
+    rolls += roll + 1
+    if rolls > 23:
+        print(rolls)
+        rolls -= 24
+        print(rolls)
+    print(rolls, (all_spaces.sprites()[rolls]).get_position())
+    player.move_to_square(roll+1, (all_spaces.sprites()[rolls]).get_position()) 
     
-
 def variable_setup():
-    global player
-    global space_positions
-    space_positions = [
-        (460, 80),
-        (550, 80),
-        (640, 80), 
-        (725, 80),
-        (815, 80),
-        (925, 190) 
-    ]
+    global player, spots
+
+    spots = []
+    spots_rects = []
 
     go_surf = pygame.image.load(join('images', 'spaces' ,'go.png')).convert_alpha()
     go_rect = go_surf.get_frect(topleft = (288, 10))
-    go = Space(all_spaces, go_surf, go_rect, (380, 80))
+    go = Space(all_spaces, go_surf, go_rect, (350, 80))
 
-    chance1_surf = pygame.image.load(join('images', 'spaces' ,'chance1.png')).convert_alpha()
-    chance1_rect = chance1_surf.get_frect(topleft = (399, 10))
-    chance1 = Space(all_spaces, chance1_surf, chance1_rect, (460, 80))
+    for i in range(5):
+        if i == 3 or 4:
+            num = 89
+        else:
+            num = 90
+        spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
+        spots_rects.append(spots[i].get_frect(topleft = ((398 + num*i), 10)))
+        Space(all_spaces, spots[i], spots_rects[i], (460+90*i, 80))
 
-    chance2_surf = pygame.image.load(join('images', 'spaces' ,'chance2.png')).convert_alpha()
-    chance2_rect = chance1_surf.get_frect(topright = (995, 120))
-    chance2 = Space(all_spaces, chance2_surf, chance2_rect, (920, 220))
+    go1_surf = pygame.image.load(join('images', 'spaces' ,'go1.png')).convert_alpha()
+    go1_rect = go_surf.get_frect(topleft = (861, 10))
+    go1 = Space(all_spaces, go1_surf, go1_rect, (925, 80))
 
-    luxury_tax_surf = pygame.image.load(join('images', 'spaces' ,'luxury_tax.png')).convert_alpha()
-    luxury_tax_rect = luxury_tax_surf.get_frect(topleft = (487, 10))
-    luxury_tax1 = Space(all_spaces, luxury_tax_surf, luxury_tax_rect, (550, 80))
+    for i in range(5, 10):
+        spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
+        spots[i] = pygame.transform.rotate(spots[i], 270)
+        spots_rects.append(spots[i].get_frect(topleft = (861, 120 + 89*(i-5))))
+        Space(all_spaces, spots[i], spots_rects[i], (925, 185 + 90*(i-5)))
 
-    com_chest_surf = pygame.image.load(join('images', 'spaces' ,'com_chest1.png')).convert_alpha()
-    com_chest_rect = com_chest_surf.get_frect(topleft = (575, 10))
-    com_chest1 = Space(all_spaces, com_chest_surf, com_chest_rect, (640, 80))
+    go2_surf = pygame.image.load(join('images', 'spaces' ,'go1.png')).convert_alpha()
+    go2_rect = go_surf.get_frect(topleft = (861, 580))
+    go2 = Space(all_spaces, go2_surf, go2_rect, (925, 640))
 
-    income_tax_surf = pygame.image.load(join('images', 'spaces' ,'income_tax.png')).convert_alpha()
-    income_tax_rect = income_tax_surf.get_frect(topleft = (663, 10))
-    income_tax1 = Space(all_spaces, income_tax_surf, income_tax_rect, (725, 80))
+    for i in range (10, 15):
+        spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
+        spots_rects.append(spots[i].get_frect(topleft = (752 - 89*(i-10), 580)))
+        Space(all_spaces, spots[i], spots_rects[i], (815 - 90*(i-10), 640))
 
-    free_perk_surf = pygame.image.load(join('images', 'spaces' ,'free_perk.png')).convert_alpha()
-    free_perk_rect = free_perk_surf.get_frect(topleft = (754, 10))
-    income_tax1 = Space(all_spaces, free_perk_surf, free_perk_rect, (815, 80))
+    go3_surf = pygame.image.load(join('images', 'spaces' ,'go1.png')).convert_alpha()
+    go3_rect = go_surf.get_frect(topleft = (288, 580))
+    go3 = Space(all_spaces, go3_surf, go3_rect, (350, 640))
 
-    go1_surf = pygame.image.load(join('images', 'spaces' ,'go.png')).convert_alpha()
-    go1_rect = go1_surf.get_frect(topleft = (861, 10))
-    go1 = Space(all_spaces, go1_surf, go1_rect, (930, 80))
+    for i in range (15, 20):
+        spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
+        spots[i] = pygame.transform.rotate(spots[i], 90)
+        spots_rects.append(spots[i].get_frect(topleft = (288, 470 - 89*(i-15))))
+        Space(all_spaces, spots[i], spots_rects[i], (355, 535- 90*(i-15)))
+
 
     player = Player(all_sprites)
+
+os.environ['SDL_AUDIODRIVER'] = 'dummy'
 pygame.init()
 
 # Setup 
@@ -124,7 +191,8 @@ clock = pygame.time.Clock()
 middle = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
 dice_rolling = True
 dice = True
-last_roll = 0 
+last_roll = 0
+rolls = 0
 
 board_surf = pygame.Surface((703, 700))
 board_surf.fill('darkseagreen2')
@@ -140,7 +208,6 @@ variable_setup()
 
 roll_frames = [pygame.image.load(join('images', 'dice', f'dice{i}.png')).convert_alpha() for i in range(1, 7)]
 
-
 while running:
     dt = clock.tick(60) / 1000
 
@@ -152,7 +219,7 @@ while running:
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                if dice_rolling: 
+                if dice_rolling:
                     dice = False
                     AnimatedDice(roll_frames, middle, all_sprites, dice_timer)
                     dice_rolling = False
