@@ -45,13 +45,14 @@ class Player(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image = pygame.image.load(join('images','player.png')).convert_alpha()
         self.rect = self.image.get_frect(center = (355, 80))
-        self.speed = 50
+        self.speed = 200
         self.target_position = self.rect.center
         self.traveling = False 
         self.space_location = 0
-        self.x_first = False
-        self.y_first = False
-        self.first = False
+        self.top_right = False
+        self.bottom_right = False
+        self.bottom_left = False
+        self.top_left = False
 
 
     def update(self, dt):  
@@ -60,34 +61,34 @@ class Player(pygame.sprite.Sprite):
             direction = pygame.math.Vector2(int(target_x) - int(self.rect.centerx), int(target_y) - int(self.rect.centery))
             if direction.length() > 1:
                 direction.normalize_ip()
-                if self.x_first:
+                if self.top_right:
                     direction.x = 1
                     direction.y = 0
                     self.rect.centerx += direction.x * self.speed * dt
                     if self.rect.centerx >= target_x:
-                        self.x_first = False
-                        direction.x = 1
-                else:
-                    self.rect.centerx += direction.x * self.speed * dt
-                    self.rect.centery += direction.y * self.speed * dt
-                if self.y_first:
+                        self.top_right = False
+
+                elif self.bottom_right:
                     direction.y = 1
                     direction.x = 0
                     self.rect.centery += direction.y * self.speed * dt
                     if self.rect.centery >= target_y:
-                        self.y_first = False
-                        direction.y = 1
-                else:
-                    self.rect.centerx += direction.x * self.speed * dt
-                    self.rect.centery += direction.y * self.speed * dt
-                if self.first:
-                    print(direction)
+                        self.bottom_right = False
+
+                elif self.bottom_left:
                     direction.x = -1
                     direction.y = 0
                     self.rect.centerx += direction.x * self.speed * dt
                     if self.rect.centerx <= target_x:
-                        self.first = False
-                        direction.x = -1
+                        self.bottom_left = False
+
+                elif self.top_left:
+                    direction.y = -1
+                    direction.x = 0
+                    self.rect.centery += direction.y * self.speed * dt
+                    if self.rect.centery <= target_y:
+                        self.top_left = False
+                        redo = False
                 else:
                     self.rect.centerx += direction.x * self.speed * dt
                     self.rect.centery += direction.y * self.speed * dt
@@ -96,36 +97,31 @@ class Player(pygame.sprite.Sprite):
 
     def move_to_square(self, space_index, space_position):
         if space_position[0] > 920:
-            self.x_first = True
-            print('x')
+            self.top_right = True
+        elif space_position[1] > 635:
+            self.bottom_right = True
+        elif space_position[0] < 360 and 100 < space_position[1] < 635:
+            self.bottom_left = True
+        elif redo:
+            self.top_left = True
+            print('yes')
         else:
-            self.x_first = False
-        if space_position[1] > 635:
-            self.y_first = True
-            print('y')
-        else:
-            self.y_first + False
-        if space_position[0] < 360 and space_position[1] < 635:
-            self.first = True
-            self.y_first = False
-            self.x_first = False
-            print('boom')
-        else:
-            self.first = False
+            self.top_right = False
+            self.bottom_right = False
+            self.bottom_left = False
+            self.top_left = False
         self.target_position = space_position
-        self.space_location += space_index
         self.traveling = True
         
 def dice_timer(roll):
-    global dice_rolling, dice, last_roll, rolls
+    global dice_rolling, dice, last_roll, rolls, redo
     dice_rolling = True
     dice = True
     last_roll = roll
     rolls += roll + 1
     if rolls > 23:
-        print(rolls)
+        redo = True 
         rolls -= 24
-        print(rolls)
     print(rolls, (all_spaces.sprites()[rolls]).get_position())
     player.move_to_square(roll+1, (all_spaces.sprites()[rolls]).get_position()) 
     
@@ -193,6 +189,7 @@ dice_rolling = True
 dice = True
 last_roll = 0
 rolls = 0
+redo = False
 
 board_surf = pygame.Surface((703, 700))
 board_surf.fill('darkseagreen2')
@@ -206,11 +203,7 @@ all_spaces = pygame.sprite.Group()
 
 variable_setup()
 
-<<<<<<< HEAD
-roll_frames = [pygame.image.load(join('images', 'dice', f'dice{i}.png')).convert_alpha() for i in range(1,7)]
-=======
 roll_frames = [pygame.image.load(join('images', 'dice', f'dice{i}.png')).convert_alpha() for i in range(1, 7)]
->>>>>>> c4672861b4a3241cc97414ed1d56b89195e22eaa
 
 while running:
     dt = clock.tick(60) / 1000
