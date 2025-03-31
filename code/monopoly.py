@@ -171,7 +171,7 @@ def variable_setup():
     player = Player(all_sprites)
 
 pygame.init()
-
+pygame.font.init()
 # Setup 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -183,6 +183,12 @@ dice = True
 last_roll = 0
 rolls = 0
 redo = False
+
+roll_button = pygame.Rect(80, WINDOW_HEIGHT - 130, 150, 80)
+
+font = pygame.font.Font('Pixel.ttf')
+text = font.render('PRESS TO ROLL', False, 0)
+text_rect = text.get_rect()
 
 board_surf = pygame.Surface((703, 700))
 board_surf.fill('darkseagreen2')
@@ -220,6 +226,8 @@ while running:
     # Drawing
     screen.fill('#892bad')
 
+    pygame.draw.rect(screen, (255,0,0), roll_button)
+    screen.blit(text, (roll_button.x + roll_button.width / 2 - text_rect.width / 2, roll_button.y + roll_button.height / 2 - text_rect.height / 2))
     # Draw the board and spaces
     screen.blit(board_surf, board_rect)
 
@@ -230,5 +238,5 @@ while running:
     all_sprites.draw(screen)
 
     pygame.display.update()
-
+pygame.font.quit()
 pygame.quit()
