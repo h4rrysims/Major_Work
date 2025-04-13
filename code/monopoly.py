@@ -235,7 +235,7 @@ while running:
     screen.fill('plum1')
 
 
-    pygame.draw.rect(screen, (255, 0, 0), roll_button)
+    pygame.draw.rect(screen, (255, 255, 255), roll_button)
     screen.blit(text, (roll_button.x + roll_button.width / 2 - text_rect.width / 2, roll_button.y + roll_button.height / 2 - text_rect.height / 2))
     # Draw the board and spaces
     screen.blit(board_surf, board_rect)
