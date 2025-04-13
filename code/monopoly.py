@@ -219,14 +219,23 @@ while running:
                     dice = False
                     AnimatedDice(roll_frames, middle, all_sprites, dice_timer, last_roll)
                     dice_rolling = False
+      
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if roll_button.collidepoint(event.pos):
+                if dice_rolling:
+                    dice = False
+                    AnimatedDice(roll_frames, middle, all_sprites, dice_timer, last_roll)
+                    dice_rolling = False
+
 
     # Update sprites
     all_sprites.update(dt)
 
     # Drawing
-    screen.fill('#892bad')
+    screen.fill('plum1')
 
-    pygame.draw.rect(screen, (255,0,0), roll_button)
+
+    pygame.draw.rect(screen, (255, 0, 0), roll_button)
     screen.blit(text, (roll_button.x + roll_button.width / 2 - text_rect.width / 2, roll_button.y + roll_button.height / 2 - text_rect.height / 2))
     # Draw the board and spaces
     screen.blit(board_surf, board_rect)
@@ -234,7 +243,7 @@ while running:
     if dice:
         screen.blit(dices[last_roll], dice_rect)
 
-    all_spaces.draw(screen)
+    all_spaces.draw(screen) 
     all_sprites.draw(screen)
 
     pygame.display.update()
