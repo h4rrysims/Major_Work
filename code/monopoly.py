@@ -235,10 +235,12 @@ while running:
     screen.fill('plum1')
 
 
-    pygame.draw.rect(screen, (255, 255, 255), roll_button)
-    screen.blit(text, (roll_button.x + roll_button.width / 2 - text_rect.width / 2, roll_button.y + roll_button.height / 2 - text_rect.height / 2))
-    # Draw the board and spaces
-    screen.blit(board_surf, board_rect)
+    shadow_offset = 4
+    shadow_rect = roll_button.move(shadow_offset, shadow_offset)
+    pygame.draw.rect(screen, (180, 180, 180), shadow_rect, border_radius=10)
+    pygame.draw.rect(screen, (255, 255, 255), roll_button, border_radius=10)
+    pygame.draw.rect(screen, (0, 0, 0), roll_button, width=3, border_radius=10)
+    screen.blit(text, (roll_button.centerx - text_rect.width // 2, roll_button.centery - text_rect.height // 2))
 
     if dice:
         screen.blit(dices[last_roll], dice_rect)
