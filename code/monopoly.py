@@ -184,7 +184,7 @@ last_roll = 0
 rolls = 0
 redo = False
 
-roll_button = pygame.Rect(80, WINDOW_HEIGHT - 130, 150, 80)
+roll_button = pygame.Rect(80, WINDOW_HEIGHT - 130, 170, 80)
 
 font = pygame.font.Font('Pixel.ttf')
 text = font.render('PRESS TO ROLL', False, 0)
