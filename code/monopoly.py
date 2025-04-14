@@ -3,6 +3,8 @@ import os
 from os.path import join
 import random 
 
+pygame.display.set_caption("Politician Monopoly")
+
 class Space(pygame.sprite.Sprite):
     def __init__(self, groups, image, location, position):
         super().__init__(groups)
