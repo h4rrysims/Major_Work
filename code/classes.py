@@ -2,7 +2,7 @@ import pygame
 from os.path import join
 
 
-class LiberalSprite(pygame.sprite.Sprite):
+class Liberal(pygame.sprite.Sprite):
     def __init__(self, pos, groups):
         super().__init__(groups)
         self.image = pygame.image.load(join('images', 'liberal.png')).convert_alpha()
@@ -19,7 +19,7 @@ class LiberalSprite(pygame.sprite.Sprite):
     def receive(self, amount):
         self.money += amount
     
-class LabourSprite(pygame.sprite.Sprite):
+class Labour(pygame.sprite.Sprite):
     def __init__(self, pos, groups):
         super().__init__(groups)
         self.image = pygame.image.load(join('images', 'Labour.png')).convert_alpha()
@@ -36,7 +36,7 @@ class LabourSprite(pygame.sprite.Sprite):
     def receive(self, amount):
         self.money += amount
 
-class GreenSprite(pygame.sprite.Sprite):
+class Green(pygame.sprite.Sprite):
     def __init__(self, pos, groups):
         super().__init__(groups)
         self.image = pygame.image.load(join('images', 'Green.png')).convert_alpha()
