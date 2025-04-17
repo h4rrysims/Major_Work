@@ -186,7 +186,7 @@ last_roll = 0
 rolls = 0
 redo = False
 class_select = True
-colour = "black"
+colour = "deepskyblue3"
 
 liberal_surf = pygame.image.load(join('images', 'liberal.png')).convert_alpha()
 liberal_rect = liberal_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
