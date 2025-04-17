@@ -140,9 +140,9 @@ def variable_setup():
         spots_rects.append(spots[i].get_frect(topleft = ((398 + num*i), 10)))
         Space(all_spaces, spots[i], spots_rects[i], (460+90*i, 80))
 
-    go1_surf = pygame.image.load(join('images', 'spaces' ,'go1.png')).convert_alpha()
-    go1_rect = go_surf.get_frect(topleft = (861, 10))
-    go1 = Space(all_spaces, go1_surf, go1_rect, (925, 80))
+    free_perk_surf = pygame.image.load(join('images', 'spaces' ,'free_perk.png')).convert_alpha()
+    free_perk_rect = go_surf.get_frect(topleft = (861, 10))
+    free_perk = Space(all_spaces, free_perk_surf, free_perk_rect, (925, 80))
 
     for i in range(5, 10):
         spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
@@ -150,9 +150,9 @@ def variable_setup():
         spots_rects.append(spots[i].get_frect(topleft = (861, 120 + 89*(i-5))))
         Space(all_spaces, spots[i], spots_rects[i], (925, 185 + 90*(i-5)))
 
-    go2_surf = pygame.image.load(join('images', 'spaces' ,'go1.png')).convert_alpha()
-    go2_rect = go_surf.get_frect(topleft = (861, 580))
-    go2 = Space(all_spaces, go2_surf, go2_rect, (925, 640))
+    go1_surf = pygame.image.load(join('images', 'spaces' ,'+1_go.png')).convert_alpha()
+    go1_rect = go_surf.get_frect(topleft = (861, 580))
+    go1 = Space(all_spaces, go1_surf, go1_rect, (925, 640))
 
     for i in range (10, 15):
         spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
