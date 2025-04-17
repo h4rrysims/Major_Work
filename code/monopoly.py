@@ -38,9 +38,9 @@ class AnimatedDice(pygame.sprite.Sprite):
             self.dice_timer(roll) 
             
 class Player(pygame.sprite.Sprite):
-    def __init__(self, groups):
+    def __init__(self, groups, hat):
         super().__init__(groups)
-        self.image = pygame.image.load(join('images','player.png')).convert_alpha()
+        self.image = pygame.image.load(join('images', hat)).convert_alpha()
         self.rect = self.image.get_frect(center = (355, 80))
         self.speed = 200
         self.target_position = self.rect.center
@@ -170,7 +170,7 @@ def variable_setup():
         Space(all_spaces, spots[i], spots_rects[i], (355, 535- 90*(i-15)))
 
 
-    player = Player(all_sprites)
+    player = Player(all_sprites, hat)
 
 pygame.init()
 pygame.font.init()
@@ -185,6 +185,47 @@ dice = True
 last_roll = 0
 rolls = 0
 redo = False
+class_select = True
+colour = "black"
+
+liberal_surf = pygame.image.load(join('images', 'liberal.png')).convert_alpha()
+liberal_rect = liberal_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
+
+labor_surf = pygame.image.load(join('images', 'labor.png')).convert_alpha()
+labor_rect = labor_surf.get_frect(center = (WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2))
+
+greens_surf = pygame.image.load(join('images', 'greens.png')).convert_alpha()
+greens_rect = greens_surf.get_frect(center = (WINDOW_WIDTH * 0.75, WINDOW_HEIGHT / 2))
+
+while class_select:
+   
+    for event in pygame.event.get():
+        recent_keys = pygame.key.get_just_pressed()
+        if event.type == pygame.QUIT:
+            class_select = False
+            running = False
+
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_1:
+                hat = 'player_red.png'
+                class_select = False
+            if event.key == pygame.K_2:
+                hat = 'player_blue.png'
+                class_select = False
+            if event.key == pygame.K_3:
+                hat = 'player_green.png'
+                class_select = False    
+
+
+    screen.fill(colour)
+    screen.blit(liberal_surf, liberal_rect)
+    screen.blit(labor_surf, labor_rect)
+    screen.blit(greens_surf, greens_rect)
+
+
+    pygame.display.update()
+
 
 roll_button = pygame.Rect(80, WINDOW_HEIGHT - 130, 170, 80)
 
