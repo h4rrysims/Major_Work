@@ -204,18 +204,18 @@ while class_select:
         if event.type == pygame.QUIT:
             class_select = False
             running = False
-
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_1:
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if labor_rect.collidepoint(event.pos):
                 hat = 'player_red.png'
                 class_select = False
-            if event.key == pygame.K_2:
+            if liberal_rect.collidepoint(event.pos):
                 hat = 'player_blue.png'
                 class_select = False
-            if event.key == pygame.K_3:
+            if greens_rect.collidepoint(event.pos):
                 hat = 'player_green.png'
-                class_select = False    
+                class_select = False
+
+ 
 
 
     screen.fill(colour)
@@ -227,7 +227,7 @@ while class_select:
     pygame.display.update()
 
 
-roll_button = pygame.Rect(80, WINDOW_HEIGHT - 130, 170, 80)
+roll_button = pygame.FRect(80, WINDOW_HEIGHT - 130, 170, 80)
 
 font = pygame.font.Font('Pixel.ttf')
 text = font.render('PRESS TO ROLL', False, 0)
@@ -255,6 +255,13 @@ while running:
         recent_keys = pygame.key.get_just_pressed()
         if event.type == pygame.QUIT:
             running = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                if dice_rolling:
+                    dice = False
+                    AnimatedDice(roll_frames, middle, all_sprites, dice_timer, last_roll)
+                    dice_rolling = False
       
         if event.type == pygame.MOUSEBUTTONDOWN:
             if roll_button.collidepoint(event.pos):
