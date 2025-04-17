@@ -255,13 +255,6 @@ while running:
         recent_keys = pygame.key.get_just_pressed()
         if event.type == pygame.QUIT:
             running = False
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                if dice_rolling:
-                    dice = False
-                    AnimatedDice(roll_frames, middle, all_sprites, dice_timer, last_roll)
-                    dice_rolling = False
       
         if event.type == pygame.MOUSEBUTTONDOWN:
             if roll_button.collidepoint(event.pos):
