@@ -1,5 +1,4 @@
 import pygame
-import os
 from os.path import join
 import random 
 
@@ -187,6 +186,60 @@ rolls = 0
 redo = False
 class_select = True
 colour = "deepskyblue3"
+Influence_points = 1500
+property_cost = 0
+color = (255,255,255)
+color_light = (170,170,170)
+color_dark = (100,100,100)
+height = 720
+width = 1280
+ROI = 0
+global Brooky,Manly_Vale,Belrose,Terry_Hills,Dee_Why,Cromer,Forest,Alambie,Beacon_Hill,Sea_Forth,Curly,Freshy,Manly
+Brooky = False
+Manly_Vale = False
+Belrose = False
+Terry_Hills = False
+Dee_Why = False
+Cromer = False
+Forest = False
+Alambie = False
+Beacon_Hill = False
+Sea_Forth = False
+Curly = False
+Freshy = False
+Manly = False
+Votes = 0
+houses = [1,2,4,5,7,10,11,13,14,16,19,20,22]
+other = [0,3,6,8,9,12,15,17,18,21,23,24]
+roll_button = pygame.Rect(50, WINDOW_HEIGHT - 130, 180, 80)
+running = True
+font = pygame.font.Font('Pixel.ttf')
+text = font.render('PRESS TO ROLL', False, color)
+text_rect = text.get_rect()
+
+board_surf = pygame.Surface((703, 700))
+board_surf.fill('darkseagreen2')
+board_rect = board_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
+
+dices = [pygame.image.load(join('images', 'dice', f'dice{i}.png')).convert_alpha() for i in range(1, 7)]
+dice_rect = dices[1].get_frect(center = middle)
+properties_title = font.render('Properties Owned:' , True , color)
+all_sprites = pygame.sprite.Group()
+all_spaces = pygame.sprite.Group()
+
+Brooky_text = font.render('Brooky', False, (150,75,0))
+Manly_Vale_text = font.render('Manly Vale', False, (150,75,0))
+Belrose_text = font.render('Belrose', False, (100,216,255))
+Terry_Hills_text = font.render('Terry Hills', False, (100,216,255))
+Dee_Why_text = font.render('Dee Why', False, (255,165,0))
+Cromer_text = font.render('Cromer', False, (255,192,240))
+Forest_text = font.render('Forest', False, (255,192,240))
+Alambie_text = font.render('Alambie', False, (255,0,0))
+Beacon_Hill_text = font.render('Beacon Hill', False, (255,0,0))
+Sea_Forth_text = font.render('Sea Forth', False, (255,215,0))
+Curly_text = font.render('Curly', False, (160,140,255))
+Freshy_text = font.render('Freshy', False, (160,140,255))
+Manly_text = font.render('Manly', False, (0,0,255))
 
 liberal_surf = pygame.image.load(join('images', 'liberal.png')).convert_alpha()
 liberal_rect = liberal_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
@@ -228,6 +281,9 @@ while class_select:
 
 
 roll_button = pygame.FRect(80, WINDOW_HEIGHT - 130, 170, 80)
+roll_button_sprite = [pygame.image.load(f"images/button/roll_button{i}.png") for i in range(2)]
+
+roll_button_idx = 0
 
 font = pygame.font.Font('Pixel.ttf')
 text = font.render('PRESS TO ROLL', False, 0)
@@ -262,21 +318,16 @@ while running:
                     dice = False
                     AnimatedDice(roll_frames, middle, all_sprites, dice_timer, last_roll)
                     dice_rolling = False
-
+                    roll_button_idx = 1
+        if event.type == pygame.MOUSEBUTTONUP:
+            roll_button_idx = 0
 
     # Update sprites
     all_sprites.update(dt)
 
     # Drawing
     screen.fill('plum1')
-
-
-    shadow_offset = 4
-    shadow_rect = roll_button.move(shadow_offset, shadow_offset)
-    pygame.draw.rect(screen, (180, 180, 180), shadow_rect, border_radius=10)
-    pygame.draw.rect(screen, (255, 255, 255), roll_button, border_radius=10)
-    pygame.draw.rect(screen, (0, 0, 0), roll_button, width=3, border_radius=10)
-    screen.blit(text, (roll_button.centerx - text_rect.width // 2, roll_button.centery - text_rect.height // 2))
+    screen.blit(roll_button_sprite[roll_button_idx], roll_button)
 
     if dice:
         screen.blit(dices[last_roll], dice_rect)
