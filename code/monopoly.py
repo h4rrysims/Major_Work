@@ -468,10 +468,10 @@ while running:
         width - 1230 <= mouse[0] <= width - 1050
         and height - 230 <= mouse[1] <= height - 150
     ):
-        pygame.draw.rect(screen, color_light, can_buy_button_rect, border_radius=6)
+        pygame.draw.rect(screen, color_dark, can_buy_button_rect, border_radius=6)
 
     else:
-        pygame.draw.rect(screen, color_dark, can_buy_button_rect, border_radius=6)
+        pygame.draw.rect(screen, color_light, can_buy_button_rect, border_radius=6)
 
     if rolls in houses:
         if rolls in prices and prices[rolls] < 0:
