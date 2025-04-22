@@ -475,7 +475,7 @@ while running:
 
     if rolls in houses:
         if rolls in prices and prices[rolls] < 0:
-            buy_text = font.render("Buy Property:SOLD", False, color)
+            buy_text = font.render("Buy Property: SOLD", False, color)
         else:
             buy_text = font.render("Buy Property: $" + str(property_cost), False, color)
 
