@@ -2,6 +2,7 @@ import pygame
 import os
 from os.path import join
 import random
+from math import ceil
 
 pygame.display.set_caption("Politician Monopoly")
 
@@ -116,7 +117,7 @@ class Player(pygame.sprite.Sprite):
 
 
 def dice_timer(roll):
-    global dice_rolling, dice, last_roll, rolls, redo
+    global dice_rolling, dice, last_roll, rolls, redo, Votes
     dice_rolling = True
     dice = True
     last_roll = roll
@@ -125,7 +126,6 @@ def dice_timer(roll):
         redo = True
         rolls -= 24
         Votes += 20
-    print(rolls, (all_spaces.sprites()[rolls]).get_position())
     player.move_to_square((all_spaces.sprites()[rolls]).get_position())
 
 
@@ -207,7 +207,7 @@ class_select = True
 colour = "deepskyblue3"
 Influence_points = 1500
 property_cost = 0
-color = (0, 0, 0)
+color = 0
 color_light = (170, 170, 170)
 color_dark = (100, 100, 100)
 height = 720
@@ -232,7 +232,8 @@ houses = [1, 2, 4, 5, 7, 10, 11, 13, 14, 16, 19, 20, 22]
 other = [0, 3, 6, 8, 9, 12, 15, 17, 18, 21, 23, 24]
 roll_button = pygame.Rect(50, WINDOW_HEIGHT - 130, 180, 80)
 running = True
-font = pygame.font.Font("Pixel.ttf", 24)
+
+font = pygame.font.Font("Pixel.ttf", 20)
 
 liberal_surf = pygame.image.load(join("images", "liberal.png")).convert_alpha()
 liberal_rect = liberal_surf.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
@@ -273,10 +274,6 @@ roll_button_sprites = [
 ]
 roll_button_idx = 0
 
-font = pygame.font.Font("Pixel.ttf")
-text = font.render("PRESS TO ROLL", False, 0)
-text_rect = text.get_rect()
-
 board_surf = pygame.Surface((703, 700))
 board_surf.fill("darkseagreen2")
 board_rect = board_surf.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
@@ -305,13 +302,30 @@ Curly_text = font.render("Curly", False, (160, 140, 255))
 Freshy_text = font.render("Freshy", False, (160, 140, 255))
 Manly_text = font.render("Manly", False, (0, 0, 255))
 
+prices = {
+    1: 50,
+    2: 50,
+    4: 150,
+    5: 200,
+    7: 300,
+    10: 400,
+    11: 450,
+    13: 550,
+    14: 600,
+    16: 650,
+    19: 700,
+    20: 700,
+    22: 750,
+}
+
 variable_setup()
 
 roll_frames = [
     pygame.image.load(join("images", "dice", "roll", f"{i}.png")).convert_alpha()
     for i in range(0, 8)
 ]
-buy_text = font.render("Buy Property: $" + str(property_cost), True, color)
+
+just_taxed = False
 
 while running:
     dt = clock.tick(60) / 1000
@@ -327,6 +341,9 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        if event.type == pygame.MOUSEBUTTONUP:
+            roll_button_idx = 0
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             if roll_button.collidepoint(event.pos):
                 if dice_rolling and not player.traveling:
@@ -337,103 +354,102 @@ while running:
                     dice_rolling = False
                     roll_button_idx = 1
 
+            # income tax
+            if rolls == 3 and not just_taxed:
+                Influence_points = ceil(Influence_points * 0.9)
+                just_taxed = True
+
+            # luxury tax
+            if rolls == 15:
+                # TODO: handle failing
+                print(Influence_points)
+                Influence_points = max(Influence_points - 200, 0)
+                print(Influence_points)
+
             # info screen?
             if (
                 width - 1230 <= mouse[0] <= width - 1050
                 and height - 230 <= mouse[1] <= height - 120
             ):
                 if rolls == 1:
-                    property_cost = 10
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Brooky == False:
                             Brooky = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
 
                 if rolls == 2:
-                    property_cost = 10
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Manly_Vale == False:
                             Manly_Vale = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 4:
-                    property_cost = 30
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Belrose == False:
                             Belrose = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 5:
-                    property_cost = 40
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Terry_Hills == False:
                             Terry_Hills = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 7:
-                    property_cost = 60
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Dee_Why == False:
                             Dee_Why = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 10:
-                    property_cost = 80
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Cromer == False:
                             Cromer = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 11:
-                    property_cost = 90
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Forest == False:
                             Forest = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 13:
-                    property_cost = 110
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Alambie == False:
                             Alambie = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 14:
-                    property_cost = 120
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Beacon_Hill == False:
                             Beacon_Hill = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 16:
-                    property_cost = 130
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Sea_Forth == False:
                             Sea_Forth = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 19:
-                    property_cost = 140
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Curly == False:
                             Curly = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 20:
-                    property_cost = 140
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Freshy == False:
                             Freshy = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
                 if rolls == 22:
-                    property_cost = 150
-                    if Influence_points >= property_cost:
+                    if Influence_points >= prices[rolls]:
                         if Manly == False:
                             Manly = True
-                            Influence_points = Influence_points - property_cost
-                            property_cost = -1
+                            Influence_points = Influence_points - prices[rolls]
+                            prices[rolls] = -1
 
     # Update sprites
     all_sprites.update(dt)
@@ -447,14 +463,29 @@ while running:
 
     screen.blit(votes_text, (20, height - 700))
     screen.blit(influence_text, (20, height - 680))
+    can_buy_button_rect = pygame.Rect(50, height - 230, 180, 80)
     if (
         width - 1230 <= mouse[0] <= width - 1050
         and height - 230 <= mouse[1] <= height - 150
     ):
-        pygame.draw.rect(screen, color_light, [50, height - 230, 180, 80])
+        pygame.draw.rect(screen, color_light, can_buy_button_rect, border_radius=6)
 
     else:
-        pygame.draw.rect(screen, color_dark, [50, height - 230, 180, 80])
+        pygame.draw.rect(screen, color_dark, can_buy_button_rect, border_radius=6)
+
+    if rolls in houses:
+        if rolls in prices and prices[rolls] < 0:
+            buy_text = font.render("Buy Property:SOLD", False, color)
+        else:
+            buy_text = font.render("Buy Property: $" + str(property_cost), False, color)
+
+        buy_text_rect = buy_text.get_rect(center=(140, 530))
+
+    else:
+        buy_text = font.render("Can Not Buy", False, color)
+        buy_text_rect = buy_text.get_rect(center=(140, 530))
+
+    screen.blit(buy_text, buy_text_rect)
 
     if (
         width - 860 <= mouse[0] <= width - 775
@@ -627,41 +658,31 @@ while running:
         screen.blit(set_bonus_text, (30, height - 430))
 
     if rolls == 1:
-        property_cost = 10
-
+        property_cost = 50
     if rolls == 2:
-        property_cost = 10
+        property_cost = 50
     if rolls == 4:
-        property_cost = 30
-    if rolls == 5:
-        property_cost = 40
-    if rolls == 7:
-        property_cost = 60
-    if rolls == 10:
-        property_cost = 80
-    if rolls == 11:
-        property_cost = 90
-    if rolls == 13:
-        property_cost = 110
-    if rolls == 14:
-        property_cost = 120
-    if rolls == 16:
-        property_cost = 130
-    if rolls == 19:
-        property_cost = 140
-    if rolls == 20:
-        property_cost = 140
-    if rolls == 22:
         property_cost = 150
-
-    if rolls in houses:
-        buy_text = font.render("Buy Property: $" + str(property_cost), True, color)
-        if property_cost < 0:
-            buy_text = font.render("Buy Property:SOLD", True, color)
-        screen.blit(buy_text, (width - 1220, height - 200))
-    if rolls in other:
-        buy_text = font.render("Can not Buy", True, color)
-        screen.blit(buy_text, (width - 1195, height - 200))
+    if rolls == 5:
+        property_cost = 200
+    if rolls == 7:
+        property_cost = 300
+    if rolls == 10:
+        property_cost = 400
+    if rolls == 11:
+        property_cost = 450
+    if rolls == 13:
+        property_cost = 550
+    if rolls == 14:
+        property_cost = 600
+    if rolls == 16:
+        property_cost = 650
+    if rolls == 19:
+        property_cost = 700
+    if rolls == 20:
+        property_cost = 700
+    if rolls == 22:
+        property_cost = 750
 
     screen.blit(board_surf, board_rect)
     screen.blit(properties_title, (width - 270, height - 700))
