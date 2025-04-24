@@ -358,7 +358,7 @@ while running:
             if rolls == 3 and not just_taxed:
                 Influence_points = ceil(Influence_points * 0.9)
                 just_taxed = True
-                just_taxed = False9y
+                just_taxed = False
 
             # luxury tax
             if rolls == 15:
