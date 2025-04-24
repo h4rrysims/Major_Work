@@ -362,7 +362,6 @@ while running:
 
             # luxury tax
             if rolls == 15:
-                # TODO: handle failing
                 print(Influence_points)
                 Influence_points = max(Influence_points - 200, 0)
                 print(Influence_points)
