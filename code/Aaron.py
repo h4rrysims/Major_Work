@@ -324,7 +324,7 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if roll_button.collidepoint(event.pos):
-                if dice_rolling:
+                if dice_rolling and not player.traveling:
                     dice = False
                     AnimatedDice(roll_frames, middle, all_sprites, dice_timer, last_roll)
                     dice_rolling = False
