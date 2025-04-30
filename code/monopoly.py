@@ -5,7 +5,7 @@ import random
 from math import ceil
 
 TAX_SQUARE_INCOME = 3
-TAX_SQUARE_LUXURY = 15
+TAX_SQUARE_LUXERY = 15
 FREE_VOTES_SQUARE_1 = 6
 FREE_VOTES_SQUARE_2 = 23
 
@@ -227,7 +227,7 @@ def variable_setup():
 
     go3_surf = pygame.image.load(join("images", "spaces", "go1.png")).convert_alpha()
     go3_rect = go_surf.get_rect(topleft=(288, 580))
-    go3 = Space(all_spaces, go3_surf, go3_rect, (350, 640), "go1", (0,0,0), 0, 0)
+    go3 = Space(all_spaces, go3_surf, go3_rect, (350, 640), "-1_go", (0,0,0), 0, 0)
 
     for i in range(15, 20):
         spots.append(
@@ -335,7 +335,7 @@ variable_setup()
 
 influence_squares = {
     TAX_SQUARE_INCOME: lambda x: max(x - 100, 0),
-    TAX_SQUARE_LUXURY: lambda x:  max(x - 50, 0)
+    TAX_SQUARE_LUXERY: lambda x: x + 50
 }
 
 vote_squares = {
