@@ -24,9 +24,16 @@ class Space(pygame.sprite.Sprite):
         self.space = 0
         self.text_pos = text_pos
         self.displayed = False
+        self.bought = True
 
     def get_position(self):
         return self.postion
+
+    def set_buy(self, is_bought):
+        self.bought = is_bought
+
+    def get_buy(self):
+        return self.bought
 
     def get_cost(self):
         return self.cost
@@ -162,7 +169,7 @@ def variable_setup():
     spots = []
     spots_rects = []
     names = ["Brooky", "Manly Vale", "Income Tax", "Belrose", "Terrey Hills", "Dee Why", "Com Chest", "Chance", "Cromer", "Forest", "Alambie", "Beacon Hill", "Luxury Tax", "Sea Forth", "Com Chest", "Curly", "Freshy", "Chance", "Manly", "Free Perk"]
-    colours = [(150, 75, 0), (150, 75, 0), (0, 0, 0), (100, 216, 255), (100, 216, 255), (255, 165, 0), (0, 0, 0), (0, 0, 0), (255, 192, 240), (255, 192, 240), (255, 0, 0), (255, 0, 0), (0, 0, 0), (255, 215, 0), (0, 0, 0), (160, 140, 255), (160, 140, 255), (0, 0, 0), (0, 0, 255), (0, 0, 0)]
+    colours = [(150, 75, 0), (150, 75, 0), (0, 0, 0), (100, 216, 255), (100, 216, 255), (255, 165, 0), (0, 0, 0), (0, 0, 0), (29, 233, 182), (29, 233, 182), (255, 0, 0), (255, 0, 0), (0, 0, 0), (255, 215, 0), (0, 0, 0), (160, 140, 255), (160, 140, 255), (0, 0, 0), (0, 0, 255), (0, 0, 0)]
     property_values = [50, 50, 0, 150, 200, 300, 0, 0, 400, 450, 550, 600, 0, 650, 0, 700, 700, 0, 750, 0]
     text_positions = [45, 70, 0, 95, 120, 145, 0, 0, 170, 195, 220, 245, 0, 270, 0, 295, 320, 0, 345, 0]
     set = { 
@@ -367,8 +374,10 @@ while running:
                 current_time = pygame.time.get_ticks()
                 buy_button_idx = 1
                 if property_price != 0:
-                    Influence_points -= property_price
-                    (all_spaces.sprites()[rolls]).display()
+                    if (all_spaces.sprites()[rolls]).get_buy():
+                        Influence_points -= property_price
+                        (all_spaces.sprites()[rolls]).display()
+                        (all_spaces.sprites()[rolls]).set_buy(False)
 
             if rolls in influence_squares:
                 Influence_points = influence_squares[rolls](Influence_points)
