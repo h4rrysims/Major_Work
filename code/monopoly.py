@@ -225,7 +225,7 @@ def variable_setup():
         spots_rects.append(spots[i].get_rect(topleft=(752 - 89 * (i - 10), 580)))
         Space(all_spaces, spots[i], spots_rects[i], (815 - 90 * (i - 10), 640), names[i], colours[i], property_values[i], text_positions[i])
 
-    go3_surf = pygame.image.load(join("images", "spaces", "go1.png")).convert_alpha()
+    go3_surf = pygame.image.load(join("images", "spaces", "-1_go.png")).convert_alpha()
     go3_rect = go_surf.get_rect(topleft=(288, 580))
     go3 = Space(all_spaces, go3_surf, go3_rect, (350, 640), "-1_go", (0,0,0), 0, 0)
 
