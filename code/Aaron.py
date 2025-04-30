@@ -4,6 +4,11 @@ from os.path import join
 import random 
 from math import ceil
 
+TAX_SQUARE_INCOME = 3
+TAX_SQUARE_LUXERY = 15
+FREE_VOTES_SQUARE_1 = 6
+FREE_VOTES_SQUARE_2 = 23
+
 pygame.display.set_caption("Politician Monopoly")
 
 class Space(pygame.sprite.Sprite):
@@ -157,10 +162,30 @@ def variable_setup():
 
     spots = []
     spots_rects = []
-    names = ["Brooky", "Manly Vale", "Income Tax", "Belrose", "Terry Hills", "Dee Why", "Com Chest", "Chance", "Cromer", "Forest", "Alambie", "Beacon Hill", "Luxury Tax", "Sea Forth", "Com Chest", "Curly", "Freshy", "Chance", "Manly", "Free Perk"]
+    names = ["Brooky", "Manly Vale", "Income Tax", "Belrose", "Terrey Hills", "Dee Why", "Com Chest", "Chance", "Cromer", "Forest", "Alambie", "Beacon Hill", "Luxury Tax", "Sea Forth", "Com Chest", "Curly", "Freshy", "Chance", "Manly", "Free Perk"]
     colours = [(150, 75, 0), (150, 75, 0), (0, 0, 0), (100, 216, 255), (100, 216, 255), (255, 165, 0), (0, 0, 0), (0, 0, 0), (255, 192, 240), (255, 192, 240), (255, 0, 0), (255, 0, 0), (0, 0, 0), (255, 215, 0), (0, 0, 0), (160, 140, 255), (160, 140, 255), (0, 0, 0), (0, 0, 255), (0, 0, 0)]
     property_values = [50, 50, 0, 150, 200, 300, 0, 0, 400, 450, 550, 600, 0, 650, 0, 700, 700, 0, 750, 0]
     text_positions = [45, 70, 0, 95, 120, 145, 0, 0, 170, 195, 220, 245, 0, 270, 0, 295, 320, 0, 345, 0]
+    set = { 
+            "brown": ["Brooky", "Manly Vale"],
+            "blue": ["Belrose", "Terrey Hills"],
+            "yellow": ["Dee Why"],
+            "pink": ["Cromer", "Forest"],
+            "red": ["Alambie", "Beacon Hill"],
+            "gold": ["Sea Forth"],
+            "purple": ["Curl Curl", "Freshy"],
+            "turquoise": ["Manly"]
+            }
+    set_bonus = {
+                "brown": 5,
+                "blue": 15,
+                "yellow": 30,
+                "pink": 40,
+                "red": 55, 
+                "gold": 65,
+                "purple": 70,
+                "turquoise": 75
+    }
     
     go_surf = pygame.image.load(join("images", "spaces", "go.png")).convert_alpha()
     go_rect = go_surf.get_rect(topleft=(288, 10))
@@ -232,6 +257,7 @@ class_select = True
 colour = "deepskyblue3"
 property_price = 0
 Influence_points = 1500
+Votes = 0
 current_time = pygame.time.get_ticks()
 
 liberal_surf = pygame.image.load(join('images', 'liberal.png')).convert_alpha()
@@ -308,13 +334,22 @@ all_spaces = pygame.sprite.Group()
 
 variable_setup()
 
-roll_frames = [pygame.image.load(join('images', 'dice', 'roll',  f'{i}.png')).convert_alpha() for i in range(0, 8)]
+influence_squares = {
+    TAX_SQUARE_INCOME: lambda x: max(x - 100, 0),
+    TAX_SQUARE_LUXERY: lambda x: x + 50
+}
 
-just_taxed = False
+vote_squares = {
+    FREE_VOTES_SQUARE_1: lambda x: x + 20,
+    FREE_VOTES_SQUARE_2: lambda x: x + 20   
+}
+
+roll_frames = [pygame.image.load(join('images', 'dice', 'roll',  f'{i}.png')).convert_alpha() for i in range(0, 8)]
 
 while running:
     dt = clock.tick(60) / 1000
     influence_text = pixel_font.render("Influence Points: " + str(Influence_points), True, 'black')
+    votes_text = pixel_font.render("Votes: " + str(Votes), True, 'black')
 
     # Event loops
     for event in pygame.event.get():
@@ -322,7 +357,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        print(event.type)
+        if event.type == pygame.MOUSEBUTTONDOWN and dice_rolling and not player.traveling:
             if roll_button.collidepoint(event.pos):
                 if dice_rolling and not player.traveling:
                     dice = False
@@ -336,15 +372,14 @@ while running:
                     Influence_points -= property_price
                     (all_spaces.sprites()[rolls]).display()
 
-            # income tax
-            if rolls == 3 and not just_taxed:
-                Influence_points = ceil(Influence_points * 0.9)
-                just_taxed = True
-                just_taxed = False
+            print(rolls)
+            print("keys", vote_squares.keys())
+            if rolls in influence_squares:
+                Influence_points = influence_squares[rolls](Influence_points)
 
-            # luxury tax
-            if rolls == 15:
-                Influence_points = max(Influence_points - 200, 0)
+            if rolls in vote_squares:
+                Votes = vote_squares[rolls](Votes)
+
 
     if pygame.time.get_ticks() > current_time + 200:
         buy_button_idx = 0 
@@ -373,7 +408,7 @@ while running:
         screen.blit(dices[last_roll], dice_rect)
 
     screen.blit(influence_text, (20, 20))
-
+    screen.blit(votes_text, (20, 40))
     all_spaces.draw(screen) 
     all_sprites.draw(screen)
     all_spaces.update(dt)
