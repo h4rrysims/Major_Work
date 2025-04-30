@@ -5,7 +5,7 @@ import random
 from math import ceil
 
 TAX_SQUARE_INCOME = 3
-TAX_SQUARE_LUXURY = 15
+TAX_SQUARE_LUXERY = 15
 FREE_VOTES_SQUARE_1 = 6
 FREE_VOTES_SQUARE_2 = 23
 
@@ -24,9 +24,16 @@ class Space(pygame.sprite.Sprite):
         self.space = 0
         self.text_pos = text_pos
         self.displayed = False
+        self.bought = True
 
     def get_position(self):
         return self.postion
+
+    def set_buy(self, is_bought):
+        self.bought = is_bought
+
+    def get_buy(self):
+        return self.bought
 
     def get_cost(self):
         return self.cost
@@ -162,7 +169,7 @@ def variable_setup():
     spots = []
     spots_rects = []
     names = ["Brooky", "Manly Vale", "Income Tax", "Belrose", "Terrey Hills", "Dee Why", "Com Chest", "Chance", "Cromer", "Forest", "Alambie", "Beacon Hill", "Luxury Tax", "Sea Forth", "Com Chest", "Curly", "Freshy", "Chance", "Manly", "Free Perk"]
-    colours = [(150, 75, 0), (150, 75, 0), (0, 0, 0), (100, 216, 255), (100, 216, 255), (255, 165, 0), (0, 0, 0), (0, 0, 0), (255, 192, 240), (255, 192, 240), (255, 0, 0), (255, 0, 0), (0, 0, 0), (255, 215, 0), (0, 0, 0), (160, 140, 255), (160, 140, 255), (0, 0, 0), (0, 0, 255), (0, 0, 0)]
+    colours = [(150, 75, 0), (150, 75, 0), (0, 0, 0), (100, 216, 255), (100, 216, 255), (255, 165, 0), (0, 0, 0), (0, 0, 0), (29, 233, 182), (29, 233, 182), (255, 0, 0), (255, 0, 0), (0, 0, 0), (255, 215, 0), (0, 0, 0), (160, 140, 255), (160, 140, 255), (0, 0, 0), (0, 0, 255), (0, 0, 0)]
     property_values = [50, 50, 0, 150, 200, 300, 0, 0, 400, 450, 550, 600, 0, 650, 0, 700, 700, 0, 750, 0]
     text_positions = [45, 70, 0, 95, 120, 145, 0, 0, 170, 195, 220, 245, 0, 270, 0, 295, 320, 0, 345, 0]
     set = { 
@@ -225,9 +232,9 @@ def variable_setup():
         spots_rects.append(spots[i].get_rect(topleft=(752 - 89 * (i - 10), 580)))
         Space(all_spaces, spots[i], spots_rects[i], (815 - 90 * (i - 10), 640), names[i], colours[i], property_values[i], text_positions[i])
 
-    go3_surf = pygame.image.load(join("images", "spaces", "go1.png")).convert_alpha()
+    go3_surf = pygame.image.load(join("images", "spaces", "-1_go.png")).convert_alpha()
     go3_rect = go_surf.get_rect(topleft=(288, 580))
-    go3 = Space(all_spaces, go3_surf, go3_rect, (350, 640), "go1", (0,0,0), 0, 0)
+    go3 = Space(all_spaces, go3_surf, go3_rect, (350, 640), "-1_go", (0,0,0), 0, 0)
 
     for i in range(15, 20):
         spots.append(
@@ -335,7 +342,7 @@ variable_setup()
 
 influence_squares = {
     TAX_SQUARE_INCOME: lambda x: max(x - 100, 0),
-    TAX_SQUARE_LUXURY: lambda x:  max(x - 50, 0)
+    TAX_SQUARE_LUXERY: lambda x: x + 50
 }
 
 vote_squares = {
@@ -367,8 +374,10 @@ while running:
                 current_time = pygame.time.get_ticks()
                 buy_button_idx = 1
                 if property_price != 0:
-                    Influence_points -= property_price
-                    (all_spaces.sprites()[rolls]).display()
+                    if (all_spaces.sprites()[rolls]).get_buy():
+                        Influence_points -= property_price
+                        (all_spaces.sprites()[rolls]).display()
+                        (all_spaces.sprites()[rolls]).set_buy(False)
 
             if rolls in influence_squares:
                 Influence_points = influence_squares[rolls](Influence_points)
