@@ -5,7 +5,7 @@ import random
 from math import ceil
 
 TAX_SQUARE_INCOME = 3
-TAX_SQUARE_LUXERY = 15
+TAX_SQUARE_LUXURY = 15
 FREE_VOTES_SQUARE_1 = 6
 FREE_VOTES_SQUARE_2 = 23
 
@@ -389,7 +389,7 @@ variable_setup()
 
 influence_squares = {
     TAX_SQUARE_INCOME: lambda x: max(x - 100, 0),
-    TAX_SQUARE_LUXERY: lambda x: x + 50
+    TAX_SQUARE_LUXURY: lambda x: max(x - 50, 0)
 }
 
 vote_squares = {
