@@ -12,19 +12,25 @@ FREE_VOTES_SQUARE_2 = 23
 pygame.display.set_caption("Politician Monopoly")
 
 class Space(pygame.sprite.Sprite):
-    def __init__(self, groups, image, location, position, name, colour, cost, text_pos):
+    def __init__(self, groups, num, image, location, position, cost, text_pos, party, party_pos, name):
         super().__init__(groups)
         self.image = image
+        self.number = num
+        self.name = name
         self.rect = location
         self.postion = position
-        self.name = name
-        self.colour = colour
         self.cost = cost
-        self.font = pixel_font.render(self.name, True, self.colour)
         self.space = 0
         self.text_pos = text_pos
         self.displayed = False
         self.bought = True
+        self.party = party
+        self.party_pos = party_pos
+        self.party_font = pixel_font.render('—', True, self.party)
+        self.font = bold_font.render('-', True, self.party)
+        self.font_270 = pygame.transform.rotate(self.font, 270)
+        self.font_90 = pygame.transform.rotate(self.font, 90)
+
 
     def get_position(self):
         return self.postion
@@ -42,8 +48,16 @@ class Space(pygame.sprite.Sprite):
         self.displayed = True
 
     def update(self, dt):
+        if self.number in [1, 2, 4, 5, 11, 12, 14]:
+            screen.blit(self.font, self.party_pos)
+        elif self.number in [6, 9, 10]:
+            screen.blit(self.font_270, self.party_pos)
+        elif self.number in [16, 17, 19]:
+            screen.blit(self.font_90, self.party_pos)
+            
         if self.displayed:
-            screen.blit(self.font, (1000, self.text_pos))
+            screen.blit(self.font, (1000, self.text_pos))     
+                
         if self.rect.collidepoint(pygame.mouse.get_pos()):
             if self.cost != 0:
                 property_name = pixel_font.render(self.name, True, 0)
@@ -168,10 +182,11 @@ def variable_setup():
 
     spots = []
     spots_rects = []
-    names = ["Brooky", "Manly Vale", "Income Tax", "Belrose", "Terrey Hills", "Dee Why", "Com Chest", "Chance", "Cromer", "Forest", "Alambie", "Beacon Hill", "Luxury Tax", "Sea Forth", "Com Chest", "Curly", "Freshy", "Chance", "Manly", "Free Perk"]
-    colours = [(150, 75, 0), (150, 75, 0), (0, 0, 0), (100, 216, 255), (100, 216, 255), (255, 165, 0), (0, 0, 0), (0, 0, 0), (29, 233, 182), (29, 233, 182), (255, 0, 0), (255, 0, 0), (0, 0, 0), (255, 215, 0), (0, 0, 0), (160, 140, 255), (160, 140, 255), (0, 0, 0), (0, 0, 255), (0, 0, 0)]
     property_values = [50, 50, 0, 150, 200, 300, 0, 0, 400, 450, 550, 600, 0, 650, 0, 700, 700, 0, 750, 0]
     text_positions = [45, 70, 0, 95, 120, 145, 0, 0, 170, 195, 220, 245, 0, 270, 0, 295, 320, 0, 345, 0]
+    names = ["Brooky", "Manly Vale", "Income Tax", "Belrose", "Terrey Hills", "Dee Why", "Com Chest", "Chance", "Cromer", "Forest", "Alambie", "Beacon Hill", "Luxury Tax", "Sea Forth", "Com Chest", "Curly", "Freshy", "Chance", "Manly", "Free Perk"]
+    party_values = ['springgreen4', 'springgreen4', 'white', 'springgreen4', 'firebrick1', 'firebrick1', 'white', 'white', 'springgreen4', 'deepskyblue3', 'springgreen4', 'firebrick1', 'white', 'springgreen4', 'white', 'deepskyblue3', 'deepskyblue3', 'white', 'firebrick1', 'white']
+    party_positions = [(425, -70), (514, -70), (0, 0), (693, -70), (782, -70), (908, 145), (0, 0), (0, 0), (908, 412), (908, 502), (780, 498), (691, 498), (0, 0), (513, 498), (0, 0), (206, 498), (206, 410), (0, 0), (206, 232),(0, 0)]
     set = { 
             "brown": ["Brooky", "Manly Vale"],
             "blue": ["Belrose", "Terrey Hills"],
@@ -195,7 +210,7 @@ def variable_setup():
     
     go_surf = pygame.image.load(join("images", "spaces", "go.png")).convert_alpha()
     go_rect = go_surf.get_rect(topleft=(288, 10))
-    go = Space(all_spaces, go_surf, go_rect, (350, 80), "go", (0,0,0), 0, 0)
+    go = Space(all_spaces, 0, go_surf, go_rect, (350, 80), 0, 0, 'white', (0,0), None)
 
     for i in range(5):
         if i == 3 or 4:
@@ -206,11 +221,11 @@ def variable_setup():
             pygame.image.load(join("images", "spaces", f"{i}.png")).convert_alpha()
         )
         spots_rects.append(spots[i].get_rect(topleft=((398 + num * i), 10)))
-        Space(all_spaces, spots[i], spots_rects[i], (460 + 90 * i, 80), names[i], colours[i], property_values[i], text_positions[i])
+        Space(all_spaces, i+1, spots[i], spots_rects[i], (460 + 90 * i, 80), property_values[i], text_positions[i], party_values[i], party_positions[i], names[i])
 
     free_perk_surf = pygame.image.load(join("images", "spaces", "free_perk.png")).convert_alpha()
     free_perk_rect = go_surf.get_rect(topleft=(861, 10))
-    free_perk = Space(all_spaces, free_perk_surf, free_perk_rect, (925, 80), "Free perk", (0,0,0), 0, 0)
+    free_perk = Space(all_spaces, 0, free_perk_surf, free_perk_rect, (925, 80), 0, 0, 'white', (0,0), None)
 
     for i in range(5, 10):
         spots.append(
@@ -218,23 +233,23 @@ def variable_setup():
         )
         spots[i] = pygame.transform.rotate(spots[i], 270)
         spots_rects.append(spots[i].get_rect(topleft=(861, 120 + 89 * (i - 5))))
-        Space(all_spaces, spots[i], spots_rects[i], (925, 185 + 90 * (i - 5)), names[i], colours[i], property_values[i], text_positions[i])
+        Space(all_spaces, i+1, spots[i], spots_rects[i], (925, 185 + 90 * (i - 5)), property_values[i], text_positions[i], party_values[i], party_positions[i], names[i])
 
 
     go1_surf = pygame.image.load(join("images", "spaces", "+1_go.png")).convert_alpha()
     go1_rect = go_surf.get_rect(topleft=(861, 580))
-    go1 = Space(all_spaces, go1_surf, go1_rect, (925, 640), "+1 go", (0,0,0), 0, 0)
+    go1 = Space(all_spaces, 0, go1_surf, go1_rect, (925, 640), 0, 0, 'white', (0,0), None)
 
     for i in range(10, 15):
         spots.append(
             pygame.image.load(join("images", "spaces", f"{i}.png")).convert_alpha()
         )
         spots_rects.append(spots[i].get_rect(topleft=(752 - 89 * (i - 10), 580)))
-        Space(all_spaces, spots[i], spots_rects[i], (815 - 90 * (i - 10), 640), names[i], colours[i], property_values[i], text_positions[i])
+        Space(all_spaces, i+1, spots[i], spots_rects[i], (815 - 90 * (i - 10), 640), property_values[i], text_positions[i], party_values[i], party_positions[i], names[i])
 
     go3_surf = pygame.image.load(join("images", "spaces", "-1_go.png")).convert_alpha()
     go3_rect = go_surf.get_rect(topleft=(288, 580))
-    go3 = Space(all_spaces, go3_surf, go3_rect, (350, 640), "-1_go", (0,0,0), 0, 0)
+    go3 = Space(all_spaces, 0, go3_surf, go3_rect, (350, 640), 0, 0, 'white', (0,0), None)
 
     for i in range(15, 20):
         spots.append(
@@ -242,12 +257,13 @@ def variable_setup():
         )
         spots[i] = pygame.transform.rotate(spots[i], 90)
         spots_rects.append(spots[i].get_rect(topleft=(288, 470 - 89 * (i - 15))))
-        Space(all_spaces, spots[i], spots_rects[i], (355, 535 - 90 * (i - 15)), names[i], colours[i], property_values[i], text_positions[i])
+        Space(all_spaces, i+1, spots[i], spots_rects[i], (355, 535 - 90 * (i - 15)), property_values[i], text_positions[i], party_values[i], party_positions[i], names[i])
 
     player = Player(all_sprites, hat)
 
 pygame.init()
 pygame.font.init()
+
 # Setup 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -275,24 +291,38 @@ labor_rect = labor_surf.get_frect(center = (WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2)
 greens_surf = pygame.image.load(join('images', 'greens.png')).convert_alpha()
 greens_rect = greens_surf.get_frect(center = (WINDOW_WIDTH * 0.75, WINDOW_HEIGHT / 2))
 
-
+bold_font = pygame.font.Font('Pixel.ttf', 150)
 pixel_font = pygame.font.Font('Pixel.ttf')
 bold_pixel_font = pygame.font.Font('Pixel.ttf', 25)
 bold_pixel_font.set_bold(True)
+bold_font.set_bold(True)
 
 
 font = pygame.font.Font('font.otf', 60)
 text = font.render("Please Choose a Party", False, 0)
-properties_text = bold_pixel_font.render("Properties Owned:", True, 0)
+properites_text = bold_pixel_font.render("Your Properties:", True, 0)
 text_rect = text.get_frect(center = (WINDOW_WIDTH / 2, 100))
 
 while class_select:
-   
     for event in pygame.event.get():
         recent_keys = pygame.key.get_just_pressed()
         if event.type == pygame.QUIT:
             class_select = False
             running = False
+        if labor_rect.collidepoint(pygame.mouse.get_pos()):
+            labor_surf.set_alpha(200)
+        else:
+            labor_surf.set_alpha(255)
+
+        if liberal_rect.collidepoint(pygame.mouse.get_pos()):
+            liberal_surf.set_alpha(200)
+        else:
+            liberal_surf.set_alpha(255)
+
+        if greens_rect.collidepoint(pygame.mouse.get_pos()):
+            greens_surf.set_alpha(200)
+        else:
+            greens_surf.set_alpha(255)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if labor_rect.collidepoint(event.pos):
                 hat = 'player_red.png'
@@ -407,7 +437,7 @@ while running:
     screen.blit(button_text, button_text_rect)
     screen.blit(button_images[buy_button_idx], buy_button)
     screen.blit(buy_text, buy_pos)
-    screen.blit(properties_text, (1000, 15))
+    screen.blit(properites_text, (1000, 15))
 
     if dice:
         screen.blit(dices[last_roll], dice_rect)
