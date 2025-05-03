@@ -34,13 +34,13 @@ def show_rules_screen():
         screen.fill(LIGHT_BLUE)  
 
      
-        title = font_big.render("Monopoly Rules", True, DARK_BLUE)
+        title = font_big.render("Monopoly Rules", True, BLACK)
         screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 6)))
 
         y_offset = HEIGHT // 4  
 
        
-        currency_header = font_header.render("Currency: Influence Points", True, DARK_BLUE)
+        currency_header = font_header.render("Currency: Influence Points", True, BLACK)
         screen.blit(currency_header, (WIDTH // 2 - currency_header.get_width() // 2, y_offset))
         y_offset += 50 
         currency_text = font_medium.render(
@@ -49,7 +49,7 @@ def show_rules_screen():
         screen.blit(currency_text, (WIDTH // 2 - currency_text.get_width() // 2, y_offset))
         y_offset += 60  
 
-        objective_header = font_header.render("Objective", True, DARK_BLUE)
+        objective_header = font_header.render("Objective", True, BLACK)
         screen.blit(objective_header, (WIDTH // 2 - objective_header.get_width() // 2, y_offset))
         y_offset += 40
         objective_text = font_medium.render(
@@ -58,7 +58,7 @@ def show_rules_screen():
         screen.blit(objective_text, (WIDTH // 2 - objective_text.get_width() // 2, y_offset))
         y_offset += 60  
 
-        go_header = font_header.render("Passing 'Go'", True, DARK_BLUE)
+        go_header = font_header.render("Passing 'Go'", True, BLACK)
         screen.blit(go_header, (WIDTH // 2 - go_header.get_width() // 2, y_offset))
         y_offset += 40
         go_text = font_medium.render(
@@ -67,7 +67,7 @@ def show_rules_screen():
         screen.blit(go_text, (WIDTH // 2 - go_text.get_width() // 2, y_offset))
         y_offset += 60 
 
-        special_header = font_header.render("Special Spaces", True, DARK_BLUE)
+        special_header = font_header.render("Special Spaces", True, BLACK)
         screen.blit(special_header, (WIDTH // 2 - special_header.get_width() // 2, y_offset))
         y_offset += 40
         special_text = font_medium.render(
@@ -76,7 +76,7 @@ def show_rules_screen():
         screen.blit(special_text, (WIDTH // 2 - special_text.get_width() // 2, y_offset))
         y_offset += 60  
 
-        ending_header = font_header.render("End of Game", True, DARK_BLUE)
+        ending_header = font_header.render("End of Game", True, BLACK)
         screen.blit(ending_header, (WIDTH // 2 - ending_header.get_width() // 2, y_offset))
         y_offset += 40
         ending_text = font_medium.render(
@@ -87,7 +87,7 @@ def show_rules_screen():
 
         back_button_rect = pygame.Rect(WIDTH - button_width - 20, HEIGHT - button_height - 20, button_width, button_height)
         pygame.draw.rect(screen, YELLOW, back_button_rect, border_radius=button_radius)  
-        pygame.draw.rect(screen, DARK_BLUE, back_button_rect, 5, border_radius=button_radius)  
+        pygame.draw.rect(screen, BLACK, back_button_rect, 5, border_radius=button_radius)  
 
         back_button_text = font_small.render("Back", True, BLACK)
         screen.blit(back_button_text, back_button_text.get_rect(center=back_button_rect.center))
@@ -106,13 +106,13 @@ def show_welcome_screen():
     while True:
         screen.fill(LIGHT_BLUE)  
 
-        title = font_big.render("WELCOME TO MONOPOLY", True, DARK_BLUE)
+        title = font_big.render("WELCOME TO MONOPOLY", True, BLACK)
         screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80)))
 
-        title = font_small.render("Game made by Aaron, Tom, Harry, Jack, Samrad", True, DARK_BLUE)
+        title = font_small.render("Game made by Aaron, Tom, Harry, Jack, Samrad", True, BLACK)
         screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40)))
 
-        title = font_small.render("Aaron and Tom did like 80% of it but still", True, DARK_BLUE)
+        title = font_small.render("Aaron and Tom did like 80% of it but still", True, BLACK)
         screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 10)))
 
         continue_button_rect = pygame.Rect(WIDTH // 2 - button_width // 2, HEIGHT // 2 + 20, button_width, button_height)
