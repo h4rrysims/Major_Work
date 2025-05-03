@@ -2,17 +2,80 @@ import pygame
 import os
 from os.path import join
 import random 
-import sys
+from math import ceil
+
+TAX_SQUARE_INCOME = 3
+TAX_SQUARE_LUXURY = 15
+FREE_VOTES_SQUARE_1 = 6
+FREE_VOTES_SQUARE_2 = 23
+
+pygame.display.set_caption("Politician Monopoly")
 
 class Space(pygame.sprite.Sprite):
-    def __init__(self, groups, image, location, position):
+    def __init__(self, groups, num, image, location, position, cost, text_pos, party, party_pos, name, colour):
         super().__init__(groups)
         self.image = image
+        self.number = num
+        self.name = name
         self.rect = location
         self.postion = position
+        self.colour = colour
+        self.cost = cost
+        self.space = 0
+        self.text_pos = text_pos
+        self.displayed = False
+        self.bought = True
+        self.party = party
+        self.party_pos = party_pos
+        self.font = pixel_font.render(self.name, True, self.colour)
+        self.party_font = pixel_font.render('—', True, self.party)
+        self.bold_font = bold_font.render('-', True, self.party)
+        self.font_270 = pygame.transform.rotate(self.bold_font, 270)
+        self.font_90 = pygame.transform.rotate(self.bold_font, 90)
+        self.parties = ['Greens', 'Liberals', 'Labor']
 
     def get_position(self):
         return self.postion
+
+    def set_buy(self, is_bought):
+        self.bought = is_bought
+
+    def get_buy(self):
+        return self.bought
+
+    def get_cost(self):
+        return self.cost
+    
+    def display(self):
+        self.displayed = True
+
+    def update(self, dt):
+        for i in range(len(self.parties)):
+            if party == self.parties[i]:
+                if self.party == party_colour: 
+                    screen.blit(self.font, (1000, self.text_pos))     
+
+        if self.number in [1, 2, 4, 5, 11, 12, 14]:
+            screen.blit(self.bold_font, self.party_pos)
+        elif self.number in [6, 9, 10]:
+            screen.blit(self.font_270, self.party_pos)
+        elif self.number in [16, 17, 19]:
+            screen.blit(self.font_90, self.party_pos)
+            
+        if self.displayed:
+            screen.blit(self.font, (1000, self.text_pos))     
+                
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            if self.cost != 0:
+                property_name = pixel_font.render(self.name, True, 0)
+                cost_text = pixel_font.render("Property Cost: $"+ str(self.cost), True, 0)
+                ROI_text = pixel_font.render("ROI:", True, 0)
+                set_bonus_text = pixel_font.render("Set Bonus:", True, 0)
+                pygame.draw.rect(screen, (170 , 170, 170), [20, 120, 250, 220])
+                screen.blit(property_name, (30, 130))
+                screen.blit(cost_text, (30, 150))
+                screen.blit(ROI_text, (30, 170))
+                screen.blit(set_bonus_text, (30, 190))
 
 class AnimatedDice(pygame.sprite.Sprite):
     def __init__(self, frames, pos, groups, dice_timer, roll_index):
@@ -34,12 +97,14 @@ class AnimatedDice(pygame.sprite.Sprite):
         else:
             self.kill()
             roll = random.randint(0, 5)
-            self.dice_timer(roll,Votes) 
+            self.dice_timer(roll) 
+            print(str(Influence_points))
+            print(str(Votes))
             
 class Player(pygame.sprite.Sprite):
-    def __init__(self, groups):
+    def __init__(self, groups, hat):
         super().__init__(groups)
-        self.image = pygame.image.load(join('images','player.png')).convert_alpha()
+        self.image = pygame.image.load(join('images', hat)).convert_alpha()
         self.rect = self.image.get_frect(center = (355, 80))
         self.speed = 200
         self.target_position = self.rect.center
@@ -108,79 +173,113 @@ class Player(pygame.sprite.Sprite):
         self.target_position = space_position
         self.traveling = True
         
-def dice_timer(roll,Votes):
-    global dice_rolling, dice, last_roll, rolls, redo
+def dice_timer(roll):
+    global dice_rolling, dice, last_roll, rolls, redo, roll_button_idx
     dice_rolling = True
     dice = True
     last_roll = roll
-    rolls += roll + 1  
+    rolls += roll + 1
     if rolls > 23:
-        redo = True
-        Votes = Votes + 20
+        redo = True 
         rolls -= 24
-    print(rolls, (all_spaces.sprites()[rolls]).get_position())
     player.move_to_square((all_spaces.sprites()[rolls]).get_position()) 
-    
+    print(rolls, (all_spaces.sprites()[rolls]).get_position())
+    roll_button_idx = 0
     
 def variable_setup():
     global player, spots
 
     spots = []
     spots_rects = []
-
-    go_surf = pygame.image.load(join('images', 'spaces' ,'go.png')).convert_alpha()
-    go_rect = go_surf.get_frect(topleft = (288, 10))
-    go = Space(all_spaces, go_surf, go_rect, (350, 80))
+    property_values = [50, 50, 0, 150, 200, 300, 0, 0, 400, 450, 550, 600, 0, 650, 0, 700, 700, 0, 750, 0]
+    text_positions = [45, 70, 0, 95, 120, 145, 0, 0, 170, 195, 220, 245, 0, 270, 0, 295, 320, 0, 345, 0]
+    colours = [(150, 75, 0), (150, 75, 0), (0, 0, 0), (100, 216, 255), (100, 216, 255), (255, 165, 0), (0, 0, 0), (0, 0, 0), (29, 233, 182), (29, 233, 182), (255, 0, 0), (255, 0, 0), (0, 0, 0), (255, 215, 0), (0, 0, 0), (160, 140, 255), (160, 140, 255), (0, 0, 0), (0, 0, 255), (0, 0, 0)]
+    names = ["Brooky", "Manly Vale", "Income Tax", "Belrose", "Terrey Hills", "Dee Why", "Com Chest", "Chance", "Cromer", "Forest", "Alambie", "Beacon Hill", "Luxury Tax", "Sea Forth", "Com Chest", "Curly", "Freshy", "Chance", "Manly", "Free Perk"]
+    party_values = ['springgreen4', 'springgreen4', 'white', 'springgreen4', 'firebrick1', 'firebrick1', 'white', 'white', 'springgreen4', 'deepskyblue3', 'springgreen4', 'firebrick1', 'white', 'springgreen4', 'white', 'deepskyblue3', 'deepskyblue3', 'white', 'firebrick1', 'white']
+    party_positions = [(425, -70), (514, -70), (0, 0), (693, -70), (782, -70), (908, 145), (0, 0), (0, 0), (908, 412), (908, 502), (780, 498), (691, 498), (0, 0), (513, 498), (0, 0), (206, 498), (206, 410), (0, 0), (206, 232),(0, 0)]
+    set = { 
+            "brown": ["Brooky", "Manly Vale"],
+            "blue": ["Belrose", "Terrey Hills"],
+            "yellow": ["Dee Why"],
+            "pink": ["Cromer", "Forest"],
+            "red": ["Alambie", "Beacon Hill"],
+            "gold": ["Sea Forth"],
+            "purple": ["Curl Curl", "Freshy"],
+            "turquoise": ["Manly"]
+            }
+    set_bonus = {
+                "brown": 5,
+                "blue": 15,
+                "yellow": 30,
+                "pink": 40,
+                "red": 55, 
+                "gold": 65,
+                "purple": 70,
+                "turquoise": 75
+    }
+    
+    go_surf = pygame.image.load(join("images", "spaces", "go.png")).convert_alpha()
+    go_rect = go_surf.get_rect(topleft=(288, 10))
+    go = Space(all_spaces, 0, go_surf, go_rect, (350, 80), 0, 0, 'white', (0,0), None, 'black')
 
     for i in range(5):
         if i == 3 or 4:
             num = 89
         else:
             num = 90
-        spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
-        spots_rects.append(spots[i].get_frect(topleft = ((398 + num*i), 10)))
-        Space(all_spaces, spots[i], spots_rects[i], (460+90*i, 80))
+        spots.append(
+            pygame.image.load(join("images", "spaces", f"{i}.png")).convert_alpha()
+        )
+        spots_rects.append(spots[i].get_rect(topleft=((398 + num * i), 10)))
+        Space(all_spaces, i+1, spots[i], spots_rects[i], (460 + 90 * i, 80), property_values[i], text_positions[i], party_values[i], party_positions[i], names[i], colours[i])
 
-    go1_surf = pygame.image.load(join('images', 'spaces' ,'go1.png')).convert_alpha()
-    go1_rect = go_surf.get_frect(topleft = (861, 10))
-    go1 = Space(all_spaces, go1_surf, go1_rect, (925, 80))
+    free_perk_surf = pygame.image.load(join("images", "spaces", "free_perk.png")).convert_alpha()
+    free_perk_rect = go_surf.get_rect(topleft=(861, 10))
+    free_perk = Space(all_spaces, 0, free_perk_surf, free_perk_rect, (925, 80), 0, 0, 'white', (0,0), None, 'black')
 
     for i in range(5, 10):
-        spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
+        spots.append(
+            pygame.image.load(join("images", "spaces", f"{i}.png")).convert_alpha()
+        )
         spots[i] = pygame.transform.rotate(spots[i], 270)
-        spots_rects.append(spots[i].get_frect(topleft = (861, 120 + 89*(i-5))))
-        Space(all_spaces, spots[i], spots_rects[i], (925, 185 + 90*(i-5)))
+        spots_rects.append(spots[i].get_rect(topleft=(861, 120 + 89 * (i - 5))))
+        Space(all_spaces, i+1, spots[i], spots_rects[i], (925, 185 + 90 * (i - 5)), property_values[i], text_positions[i], party_values[i], party_positions[i], names[i], colours[i])
 
-    go2_surf = pygame.image.load(join('images', 'spaces' ,'go1.png')).convert_alpha()
-    go2_rect = go_surf.get_frect(topleft = (861, 580))
-    go2 = Space(all_spaces, go2_surf, go2_rect, (925, 640))
 
-    for i in range (10, 15):
-        spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
-        spots_rects.append(spots[i].get_frect(topleft = (752 - 89*(i-10), 580)))
-        Space(all_spaces, spots[i], spots_rects[i], (815 - 90*(i-10), 640))
+    go1_surf = pygame.image.load(join("images", "spaces", "go1.png")).convert_alpha()
+    go1_rect = go_surf.get_rect(topleft=(861, 580))
+    go1 = Space(all_spaces, 0, go1_surf, go1_rect, (925, 640), 0, 0, 'white', (0,0), None, 'black')
 
-    go3_surf = pygame.image.load(join('images', 'spaces' ,'go1.png')).convert_alpha()
-    go3_rect = go_surf.get_frect(topleft = (288, 580))
-    go3 = Space(all_spaces, go3_surf, go3_rect, (350, 640))
+    for i in range(10, 15):
+        spots.append(
+            pygame.image.load(join("images", "spaces", f"{i}.png")).convert_alpha()
+        )
+        spots_rects.append(spots[i].get_rect(topleft=(752 - 89 * (i - 10), 580)))
+        Space(all_spaces, i+1, spots[i], spots_rects[i], (815 - 90 * (i - 10), 640), property_values[i], text_positions[i], party_values[i], party_positions[i], names[i], colours[i])
 
-    for i in range (15, 20):
-        spots.append(pygame.image.load(join('images', 'spaces', f'{i}.png')).convert_alpha())
+    go3_surf = pygame.image.load(join("images", "spaces", "go1.png")).convert_alpha()
+    go3_rect = go_surf.get_rect(topleft=(288, 580))
+    go3 = Space(all_spaces, 0, go3_surf, go3_rect, (350, 640), 0, 0, 'white', (0,0), None, 'black')
+
+    for i in range(15, 20):
+        spots.append(
+            pygame.image.load(join("images", "spaces", f"{i}.png")).convert_alpha()
+        )
         spots[i] = pygame.transform.rotate(spots[i], 90)
-        spots_rects.append(spots[i].get_frect(topleft = (288, 470 - 89*(i-15))))
-        Space(all_spaces, spots[i], spots_rects[i], (355, 535- 90*(i-15)))
+        spots_rects.append(spots[i].get_rect(topleft=(288, 470 - 89 * (i - 15))))
+        Space(all_spaces, i+1, spots[i], spots_rects[i], (355, 535 - 90 * (i - 15)), property_values[i], text_positions[i], party_values[i], party_positions[i], names[i], colours[i])
 
+    player = Player(all_sprites, hat)
 
-    player = Player(all_sprites)
-
-
-    
 pygame.init()
 pygame.font.init()
+
 # Setup 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720 
+party = None
+party_colour = None
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-Running = True
+running = True
 clock = pygame.time.Clock()
 middle = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
 dice_rolling = True
@@ -188,36 +287,99 @@ dice = True
 last_roll = 0
 rolls = 0
 redo = False
+class_select = True
+colour = "deepskyblue3"
+property_price = 0
 Influence_points = 1500
-property_cost = 0
-color = (255,255,255)
-color_light = (170,170,170)
-color_dark = (100,100,100)
-height = 720
-width = 1280
-ROI = 0
-global Brooky,Manly_Vale,Belrose,Terry_Hills,Dee_Why,Cromer,Forest,Alambie,Beacon_Hill,Sea_Forth,Curly,Freshy,Manly
-Brooky = False
-Manly_Vale = False
-Belrose = False
-Terry_Hills = False
-Dee_Why = False
-Cromer = False
-Forest = False
-Alambie = False
-Beacon_Hill = False
-Sea_Forth = False
-Curly = False
-Freshy = False
-Manly = False
 Votes = 0
-houses = [1,2,4,5,7,10,11,13,14,16,19,20,22]
-other = [0,3,6,8,9,12,15,17,18,21,23,24]
-roll_button = pygame.Rect(50, WINDOW_HEIGHT - 130, 180, 80)
-running = True
-font = pygame.font.Font('Pixel.ttf')
-text = font.render('PRESS TO ROLL', False, color)
-text_rect = text.get_rect()
+current_time = pygame.time.get_ticks()
+R0i = 0
+chance_chest = ["Gain influence points","Gain votes","Add extra time to pass Go","Move backward","Lose influence points","Lose votes","Remove extra time to pass Go","Move forward"]
+Dice = [1,2,3,4,5,6]
+choice = ""
+card = True
+
+liberal_surf = pygame.image.load(join('images', 'liberal.png')).convert_alpha()
+liberal_rect = liberal_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
+
+labor_surf = pygame.image.load(join('images', 'labor.png')).convert_alpha()
+labor_rect = labor_surf.get_frect(center = (WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2))
+
+greens_surf = pygame.image.load(join('images', 'greens.png')).convert_alpha()
+greens_rect = greens_surf.get_frect(center = (WINDOW_WIDTH * 0.75, WINDOW_HEIGHT / 2))
+
+bold_font = pygame.font.Font('Pixel.ttf', 150)
+pixel_font = pygame.font.Font('Pixel.ttf')
+bold_pixel_font = pygame.font.Font('Pixel.ttf', 25)
+bold_pixel_font.set_bold(True)
+bold_font.set_bold(True)
+
+
+font = pygame.font.Font('font.otf', 60)
+text = font.render("Please Choose a Party", False, 0)
+properites_text = bold_pixel_font.render("Your Properties:", True, 0)
+text_rect = text.get_frect(center = (WINDOW_WIDTH / 2, 100))
+
+while class_select:
+    for event in pygame.event.get():
+        recent_keys = pygame.key.get_just_pressed()
+        if event.type == pygame.QUIT:
+            class_select = False
+            running = False
+        if labor_rect.collidepoint(pygame.mouse.get_pos()):
+            labor_surf.set_alpha(200)
+        else:
+            labor_surf.set_alpha(255)
+
+        if liberal_rect.collidepoint(pygame.mouse.get_pos()):
+            liberal_surf.set_alpha(200)
+        else:
+            liberal_surf.set_alpha(255)
+
+        if greens_rect.collidepoint(pygame.mouse.get_pos()):
+            greens_surf.set_alpha(200)
+        else:
+            greens_surf.set_alpha(255)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if labor_rect.collidepoint(event.pos):
+                hat = 'player_red.png'
+                party = 'Labor'
+                party_colour = 'firebrick1'
+                class_select = False
+            if liberal_rect.collidepoint(event.pos):
+                hat = 'player_blue.png'
+                party = 'Liberals'
+                party_colour = 'deepskyblue3'
+                class_select = False
+            if greens_rect.collidepoint(event.pos):
+                hat = 'player_green.png'
+                party = 'Greens'
+                party_colour = 'springgreen4'
+                class_select = False
+
+    screen.fill(colour)
+    screen.blit(liberal_surf, liberal_rect)
+    screen.blit(labor_surf, labor_rect)
+    screen.blit(greens_surf, greens_rect)
+    screen.blit(text, text_rect)
+
+
+    pygame.display.update()
+
+
+
+button_images = [pygame.image.load(f"images/button/roll_button{i}.png") for i in range(2)]
+roll_button_idx = 0
+buy_button_idx = 0
+
+roll_button = pygame.Rect(80, WINDOW_HEIGHT - 130, 170, 80)
+button_text = pixel_font.render("Press to Roll", True, 'black')
+roll_button_img_rect = button_images[roll_button_idx].get_rect(topleft=roll_button.topleft)
+button_text_rect = button_text.get_rect(center=roll_button_img_rect.center)
+
+buy_button = pygame.Rect(80, WINDOW_HEIGHT - 240, 170, 80)
+buy_text = pixel_font.render("Can't Buy", False, 'black')
+buy_pos = (140, 515)
 
 board_surf = pygame.Surface((703, 700))
 board_surf.fill('darkseagreen2')
@@ -225,390 +387,126 @@ board_rect = board_surf.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
 
 dices = [pygame.image.load(join('images', 'dice', f'dice{i}.png')).convert_alpha() for i in range(1, 7)]
 dice_rect = dices[1].get_frect(center = middle)
-properties_title = font.render('Properties Owned:' , True , color)
+
 all_sprites = pygame.sprite.Group()
 all_spaces = pygame.sprite.Group()
 
-Brooky_text = font.render('Brooky', False, (150,75,0))
-Manly_Vale_text = font.render('Manly Vale', False, (150,75,0))
-Belrose_text = font.render('Belrose', False, (100,216,255))
-Terry_Hills_text = font.render('Terry Hills', False, (100,216,255))
-Dee_Why_text = font.render('Dee Why', False, (255,165,0))
-Cromer_text = font.render('Cromer', False, (255,192,240))
-Forest_text = font.render('Forest', False, (255,192,240))
-Alambie_text = font.render('Alambie', False, (255,0,0))
-Beacon_Hill_text = font.render('Beacon Hill', False, (255,0,0))
-Sea_Forth_text = font.render('Sea Forth', False, (255,215,0))
-Curly_text = font.render('Curly', False, (160,140,255))
-Freshy_text = font.render('Freshy', False, (160,140,255))
-Manly_text = font.render('Manly', False, (0,0,255))
-
 variable_setup()
 
+influence_squares = {
+    TAX_SQUARE_INCOME: lambda x: max(x - 100, 0),
+    TAX_SQUARE_LUXURY: lambda x: max(x - 50, 0)
+}
+
+vote_squares = {
+    FREE_VOTES_SQUARE_1: lambda x: x + 20,
+    FREE_VOTES_SQUARE_2: lambda x: x + 20   
+}
+
 roll_frames = [pygame.image.load(join('images', 'dice', 'roll',  f'{i}.png')).convert_alpha() for i in range(0, 8)]
-buy_text = font.render('Buy Property: $'+ str(property_cost) , True , color)
-while Running:
+
+while running:
     dt = clock.tick(60) / 1000
-    mouse = pygame.mouse.get_pos()
-    Total_ROI_text = font.render('Total ROI: '+ str(ROI) , True , color)
-    votes_text = font.render('Votes: '+ str(Votes) , True , color)
-    influence_text = font.render('Influence Points: '+ str(Influence_points) , True , color)
-    
+    choice_text = pixel_font.render(choice, True, 'black')
+    influence_text = pixel_font.render("Influence Points: " + str(Influence_points), True, 'black')
+    votes_text = pixel_font.render("Votes: " + str(Votes), True, 'black')
+
     # Event loops
     for event in pygame.event.get():
         recent_keys = pygame.key.get_just_pressed()
         if event.type == pygame.QUIT:
-            Running = False
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if width - 1230 <= mouse[0] <= width - 1050 and height - 130 <= mouse[1] <= height - 50:
-                if dice_rolling:
+            running = False
+        if event.type == pygame.MOUSEBUTTONDOWN and dice_rolling and not player.traveling:
+            if roll_button.collidepoint(event.pos):
+                if dice_rolling and not player.traveling:
                     dice = False
                     AnimatedDice(roll_frames, middle, all_sprites, dice_timer, last_roll)
                     dice_rolling = False
-         #checks if a mouse is clicked
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            #if the mouse is clicked on the
-            if width - 1230 <= mouse[0] <= width - 1050 and height - 230 <= mouse[1] <= height - 120:
-                    if rolls == 1:
-                        property_cost = 10
-                        if Influence_points >= property_cost:
-                            if Brooky == False:
-                                Brooky = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-            
-                    if rolls == 2:
-                        property_cost = 10
-                        if Influence_points >= property_cost:
-                            if Manly_Vale == False:
-                                Manly_Vale = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 4:
-                        property_cost = 30
-                        if Influence_points >= property_cost:
-                            if Belrose == False:
-                                Belrose = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 5:
-                        property_cost = 40
-                        if Influence_points >= property_cost:
-                            if Terry_Hills == False:
-                                Terry_Hills = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 7:
-                        property_cost = 60
-                        if Influence_points >= property_cost:
-                            if Dee_Why == False:
-                                Dee_Why = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 10:
-                        property_cost = 80
-                        if Influence_points >= property_cost:
-                            if Cromer == False:
-                                Cromer = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 11:
-                        property_cost = 90
-                        if Influence_points >= property_cost:
-                            if Forest == False:
-                                Forest = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 13:
-                        property_cost = 110
-                        if Influence_points >= property_cost:
-                            if Alambie == False:
-                                Alambie = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 14:
-                        property_cost = 120
-                        if Influence_points >= property_cost:
-                            if Beacon_Hill == False:
-                                Beacon_Hill = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 16:
-                        property_cost = 130
-                        if Influence_points >= property_cost:
-                            if Sea_Forth == False:
-                                Sea_Forth = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 19:
-                        property_cost = 140
-                        if Influence_points >= property_cost:
-                            if Curly == False:
-                                Curly = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 20:
-                        property_cost = 140
-                        if Influence_points >= property_cost:
-                            if Freshy == False:
-                                Freshy = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
-                    if rolls == 22:
-                        property_cost = 150
-                        if Influence_points >= property_cost:
-                            if Manly == False:
-                                Manly = True
-                                Influence_points = Influence_points - property_cost
-                                property_cost = -1
+                    roll_button_idx = 1
+                    if rolls == 8 or rolls == 9 or rolls == 17 or rolls == 21:
+                        print("Card")
+                        choice = random.choice(chance_chest)
+                        print(choice)
+                        if choice == "Gain influence points":
+                            Influence_points = Influence_points + 100
+                            print(str(Influence_points))
+                        if choice == "Gain votes":
+                            Votes = Votes + 10
+                        if choice == "Add extra time to pass Go":
+                            pass
+                        if choice == "Move backward":
+                            rolls -= random.choice(Dice)
+                            player.move_to_square((all_spaces.sprites()[rolls]).get_position()) 
+                        if choice == "Lose influence points":
+                            Influence_points = Influence_points - 100
+                            print(str(Influence_points))
+                        if choice == "Lose votes":
+                            Votes = Votes - 10
+                        if choice == "Remove extra time to pass Go":
+                            pass
+                        if choice == "Move forward":
+                            rolls += random.choice(Dice)
+                            if rolls > 23:
+                                rolls -= 24
+                            player.move_to_square((all_spaces.sprites()[rolls]).get_position()) 
+                        choice_text = pixel_font.render(choice, True, 'black')
+                    else:
+                        choice = ""
+                        choice_text = pixel_font.render(choice, True, 'black')
+            if buy_button.collidepoint(event.pos):
+                current_time = pygame.time.get_ticks()
+                buy_button_idx = 1
+                if property_price != 0:
+                    if (all_spaces.sprites()[rolls]).get_buy():
+                        Influence_points -= property_price
+                        (all_spaces.sprites()[rolls]).display()
+                        (all_spaces.sprites()[rolls]).set_buy(False)
 
-                    
-                
+            if rolls in influence_squares:
+                Influence_points = influence_squares[rolls](Influence_points)
+
+            if rolls in vote_squares:
+                Votes = vote_squares[rolls](Votes)
+
+        
+            
+
+
+    if pygame.time.get_ticks() > current_time + 200:
+        buy_button_idx = 0 
+
+    if all_spaces.sprites()[rolls].get_cost() != 0:
+        property_price = all_spaces.sprites()[rolls].get_cost()
+        buy_text = pixel_font.render("Buy Property: $" + str(property_price), True, "black")
+        buy_pos = (105, 515)
+    else:
+        property_price = 0
+        buy_text = pixel_font.render("Can't Buy", True, 'black')
+        buy_pos = (140, 515)
 
     # Update sprites
     all_sprites.update(dt)
 
     # Drawing
-    screen.fill('#892bad')
-    pygame.draw.rect(screen,0,[10,height - 710,270,440])
-    pygame.draw.rect(screen,0,[width - 280,height - 710,270,700])
-    screen.blit(votes_text,(20,height - 700))
-    screen.blit(influence_text,(20,height - 680))
-    if width - 1230 <= mouse[0] <= width - 1050 and height - 230 <= mouse[1] <= height - 150:
-        pygame.draw.rect(screen,color_light,[50,height - 230,180,80])
+    screen.fill('plum1')
+    screen.blit(button_images[roll_button_idx], roll_button)
+    screen.blit(button_text, button_text_rect)
+    screen.blit(button_images[buy_button_idx], buy_button)
+    screen.blit(buy_text, buy_pos)
+    screen.blit(properites_text, (1000, 15))
 
-    else:
-        pygame.draw.rect(screen,color_dark,[50,height - 230,180,80])
-        
-    if width - 1230 <= mouse[0] <= width - 1050 and height - 130 <= mouse[1] <= height - 50:
-        pygame.draw.rect(screen,color_light, roll_button)
-    else:
-        pygame.draw.rect(screen,color_dark, roll_button)
-
-
-
-    if width - 860 <= mouse[0] <= width - 775 and height - 710 <= mouse[1] <= height - 580:
-        property_name = font.render('Brooky', False, 0)
-        cost_text = font.render('Property Cost: $10', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 775 <= mouse[0] <= width - 685 and height - 710 <= mouse[1] <= height - 580:
-        property_name = font.render('Manly Vale', False, 0)
-        cost_text = font.render('Property Cost: $10', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 595 <= mouse[0] <= width - 505 and height - 710 <= mouse[1] <= height - 580:
-        property_name = font.render('Belrose', False, 0)
-        cost_text = font.render('Property Cost: $30', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 505 <= mouse[0] <= width - 415 and height - 710 <= mouse[1] <= height - 580:
-        property_name = font.render('Terry Hills', False, 0)
-        cost_text = font.render('Property Cost: $40', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 420 <= mouse[0] <= width - 290 and height - 580 <= mouse[1] <= height - 495:
-        property_name = font.render('Dee Why', False, 0)
-        cost_text = font.render('Property Cost: $60', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 420 <= mouse[0] <= width - 290 and height - 315 <= mouse[1] <= height - 225:
-        property_name = font.render('Cromer', False, 0)
-        cost_text = font.render('Property Cost: $80', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 420 <= mouse[0] <= width - 290 and height - 225 <= mouse[1] <= height - 140:
-        property_name = font.render('Forest', False, 0)
-        cost_text = font.render('Property Cost: $90', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 505 <= mouse[0] <= width - 420 and height - 140 <= mouse[1] <= height - 10:
-        property_name = font.render('Alambie', False, 0)
-        cost_text = font.render('Property Cost: $110', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 595 <= mouse[0] <= width - 505 and height - 140 <= mouse[1] <= height - 10:
-        property_name = font.render('Beacon Hill', False, 0)
-        cost_text = font.render('Property Cost: $120', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 775 <= mouse[0] <= width - 685 and height - 140 <= mouse[1] <= height - 10:
-        property_name = font.render('Sea Forth', False, 0)
-        cost_text = font.render('Property Cost: $130', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 990 <= mouse[0] <= width - 860 and height - 225 <= mouse[1] <= height - 140:
-        property_name = font.render('Curl Curl', False, 0)
-        cost_text = font.render('Property Cost: $140', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 990 <= mouse[0] <= width - 860 and height - 315 <= mouse[1] <= height - 225:
-        property_name = font.render('Freshy', False, 0)
-        cost_text = font.render('Property Cost: $140', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-    elif width - 990 <= mouse[0] <= width - 860 and height - 495 <= mouse[1] <= height - 405:
-        property_name = font.render('Manly', False, 0)
-        cost_text = font.render('Property Cost: $150', False, 0)
-        ROI_text = font.render('ROI:', False, 0)
-        set_bonus_text = font.render('Set Bonus:', False, 0)
-        pygame.draw.rect(screen,color_light,[20,height - 500,250,220])
-        screen.blit(property_name,(30,height - 490))
-        screen.blit(cost_text,(30,height - 470))
-        screen.blit(ROI_text,(30,height - 450))
-        screen.blit(set_bonus_text,(30,height - 430))
-
-    else:
-        pygame.draw.rect(screen,0,[10,height - 710,270,440])
-        pygame.draw.rect(screen,0,[width - 280,height - 710,270,700])
-        screen.blit(votes_text,(20,height - 700))
-        screen.blit(influence_text,(20,height - 680))
-    
-
-
-    if rolls == 1:
-        property_cost = 10
-        
-    if rolls == 2:
-        property_cost = 10
-    if rolls == 4:
-        property_cost = 30
-    if rolls == 5:
-        property_cost = 40
-    if rolls == 7:
-        property_cost = 60
-    if rolls == 10:
-        property_cost = 80
-    if rolls == 11:
-        property_cost = 90
-    if rolls == 13:
-        property_cost = 110
-    if rolls == 14:
-        property_cost = 120
-    if rolls == 16:
-        property_cost = 130
-    if rolls == 19:
-        property_cost = 140
-    if rolls == 20:
-        property_cost = 140
-    if rolls == 22:
-        property_cost = 150
-
-
-    if rolls in houses:
-        buy_text = font.render('Buy Property: $'+ str(property_cost) , True , color)
-        if property_cost < 0:
-            buy_text = font.render('Buy Property:SOLD', True , color)
-        screen.blit(buy_text , (width - 1220,height - 200))
-    if rolls in other:
-        buy_text = font.render('Can not Buy', True , color)
-        screen.blit(buy_text , (width - 1195,height - 200))
-
-
-
-
-    #pygame.draw.rect(screen, (255,0,0), roll_button)
-    screen.blit(text, (roll_button.x + roll_button.width / 2 - text_rect.width / 2, roll_button.y + roll_button.height / 2 - text_rect.height / 2))
-    # Draw the board and spaces
-    screen.blit(board_surf, board_rect)
-    screen.blit(properties_title , (width - 270,height - 700))
-    screen.blit(Total_ROI_text , (width - 270,height - 45))
     if dice:
         screen.blit(dices[last_roll], dice_rect)
 
-
+    screen.blit(influence_text, (20, 20))
+    screen.blit(votes_text, (20, 40))
     
-    if Brooky == True:
-        screen.blit(Brooky_text , (width - 270,height - 670))
-    if Manly_Vale == True:
-        screen.blit(Manly_Vale_text , (width - 270,height - 640))
-    if Belrose == True:
-        screen.blit(Belrose_text , (width - 270,height - 610))
-    if Terry_Hills == True:
-        screen.blit(Terry_Hills_text , (width - 270,height - 580))
-    if Dee_Why == True:
-        screen.blit(Dee_Why_text , (width - 270,height - 550))
-    if Cromer == True:
-        screen.blit(Cromer_text , (width - 270,height - 520))
-    if Forest == True:
-        screen.blit(Forest_text , (width - 270,height - 490))
-    if Alambie == True:
-        screen.blit(Alambie_text , (width - 270,height - 460))
-    if Beacon_Hill == True:
-        screen.blit(Beacon_Hill_text , (width - 270,height - 430))
-    if Sea_Forth == True:
-        screen.blit(Sea_Forth_text , (width - 270,height - 400))
-    if Curly == True:
-        screen.blit(Curly_text , (width - 270,height - 370))
-    if Freshy == True:
-        screen.blit(Freshy_text , (width - 270,height - 340))
-    if Manly == True:
-        screen.blit(Manly_text , (width - 270,height - 310))
-    
-    all_spaces.draw(screen)
+    all_spaces.draw(screen) 
     all_sprites.draw(screen)
-    
+    all_spaces.update(dt)
+    if rolls == 8 or rolls == 9 or rolls == 17 or rolls == 21:
+    #if rolls > 0:
+        screen.blit(choice_text, (550, 475))
 
     pygame.display.update()
 pygame.font.quit()
