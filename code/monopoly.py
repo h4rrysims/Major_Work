@@ -4,12 +4,17 @@ from os.path import join
 import random 
 from math import ceil
 
+pygame.init()
+
 TAX_SQUARE_INCOME = 3
 TAX_SQUARE_LUXURY = 15
 FREE_VOTES_SQUARE_1 = 6
 FREE_VOTES_SQUARE_2 = 23
-
+GO_SQUARE = 0
+go_passes = 0
 pygame.display.set_caption("Politician Monopoly")
+
+game_over = 0
 
 class Space(pygame.sprite.Sprite):
     def __init__(self, groups, num, image, location, position, cost, text_pos, party, party_pos, name, colour):
@@ -112,6 +117,7 @@ class Player(pygame.sprite.Sprite):
         self.bottom_right = False
         self.bottom_left = False
         self.top_left = False
+        self.party = party
 
 
     def update(self, dt):  
@@ -172,21 +178,59 @@ class Player(pygame.sprite.Sprite):
         self.traveling = True
         
 def dice_timer(roll):
-    global dice_rolling, dice, last_roll, rolls, redo, roll_button_idx
+    global dice_rolling, dice, last_roll, rolls, redo, roll_button_idx, go_passes, game_over
     dice_rolling = True
     dice = True
     last_roll = roll
+    old_rolls = rolls
     rolls += roll + 1
-    if rolls > 23:
-        redo = True 
+    if rolls >= 24:
+        redo = True
         rolls -= 24
-    print(rolls, (all_spaces.sprites()[rolls]).get_position())
-    player.move_to_square((all_spaces.sprites()[rolls]).get_position()) 
+        go_passes += 1
+        print(f"Passed GO {go_passes} time(s)")
+
+        if go_passes >= 5:
+            game_over = True
+            print("Game Over!")
+            display_game_over() 
+
+    print(rolls, (list(all_spaces.sprites())[rolls % len(all_spaces)]).get_position())
+    all_spaces_list = all_spaces.sprites()
+    player.move_to_square((all_spaces_list[rolls % len(all_spaces_list)]).get_position())
+
     roll_button_idx = 0
-    
+
+
+def display_game_over():
+    global game_over
+    if game_over:
+        screen.fill((221, 160, 221)) 
+        font = pygame.font.SysFont(None, 48)
+        text1 = font.render("Game Over! Your journey to become an MP has ended.", True, (255, 255, 255))
+        text2 = font.render(f"You were a member of the {player.party} party.", True, (255, 255, 255))
+        text3 = font.render("Better luck next time!", True, (255, 255, 255))
+
+        
+        text_rect1 = text1.get_rect(center=(screen.get_width() // 2, screen.get_height() // 3))
+        text_rect2 = text2.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+        text_rect3 = text3.get_rect(center=(screen.get_width() // 2, screen.get_height() * 2 // 3))
+        
+        screen.blit(text1, text_rect1)
+        screen.blit(text2, text_rect2)
+        
+        pygame.display.flip() 
+        pygame.time.wait(5000)  
+        pygame.quit()  
+        exit()  
+
+    if game_over:
+        display_game_over()
+        pygame.quit()
+        exit()
+
 def variable_setup():
     global player, spots
-
     spots = []
     spots_rects = []
     property_values = [50, 50, 0, 150, 200, 300, 0, 0, 400, 450, 550, 600, 0, 650, 0, 700, 700, 0, 750, 0]
@@ -468,3 +512,4 @@ while running:
     pygame.display.update()
 pygame.font.quit()
 pygame.quit()
+exit()
