@@ -161,7 +161,7 @@ class Space(pygame.sprite.Sprite):
         self.number = num
         self.name = name
         self.rect = location
-        self.postion = position
+        self.position = position
         self.colour = colour
         self.cost = cost
         self.space = 0
@@ -213,7 +213,11 @@ class Space(pygame.sprite.Sprite):
                 property_name = pixel_font.render(self.name, True, 0)
                 cost_text = pixel_font.render("Property Cost: $"+ str(self.cost), True, 0)
                 ROI_text = pixel_font.render("ROI:", True, 0)
-                set_bonus_text = pixel_font.render("Set Bonus:", True, 0)
+                for color, locs in zip(sets.keys(), sets.values()):
+                    if self.name in locs:
+                         setbonus = set_bonus[color]
+                         break
+                set_bonus_text = pixel_font.render("Set Bonus: " + str(setbonus) , True, 0)
                 pygame.draw.rect(screen, (170 , 170, 170), [20, 120, 250, 220])
                 screen.blit(property_name, (30, 130))
                 screen.blit(cost_text, (30, 150))
@@ -368,7 +372,7 @@ def display_game_over():
         exit()
 
 def variable_setup():
-    global player, spots
+    global player, spots, sets, set_bonus, names
     spots = []
     spots_rects = []
     property_values = [50, 50, 0, 150, 200, 300, 0, 0, 400, 450, 550, 600, 0, 650, 0, 700, 700, 0, 750, 0]
@@ -377,7 +381,7 @@ def variable_setup():
     names = ["Brooky", "Manly Vale", "Income Tax", "Belrose", "Terrey Hills", "Dee Why", "Com Chest", "Chance", "Cromer", "Forest", "Alambie", "Beacon Hill", "Luxury Tax", "Sea Forth", "Com Chest", "Curly", "Freshy", "Chance", "Manly", "Free Perk"]
     party_values = ['springgreen4', 'springgreen4', 'white', 'springgreen4', 'firebrick1', 'firebrick1', 'white', 'white', 'springgreen4', 'deepskyblue3', 'springgreen4', 'firebrick1', 'white', 'springgreen4', 'white', 'deepskyblue3', 'deepskyblue3', 'white', 'firebrick1', 'white']
     party_positions = [(425, -70), (514, -70), (0, 0), (693, -70), (782, -70), (908, 145), (0, 0), (0, 0), (908, 412), (908, 502), (780, 498), (691, 498), (0, 0), (513, 498), (0, 0), (206, 498), (206, 410), (0, 0), (206, 232),(0, 0)]
-    set = { 
+    sets = { 
             "brown": ["Brooky", "Manly Vale"],
             "blue": ["Belrose", "Terrey Hills"],
             "yellow": ["Dee Why"],
@@ -387,6 +391,9 @@ def variable_setup():
             "purple": ["Curl Curl", "Freshy"],
             "turquoise": ["Manly"]
             }
+    
+
+
     set_bonus = {
                 "brown": 5,
                 "blue": 15,
@@ -618,15 +625,23 @@ while running:
     if pygame.time.get_ticks() > current_time + 200:
         buy_button_idx = 0 
 
-    if all_spaces.sprites()[rolls].get_cost() != 0:
+    if not (all_spaces.sprites()[rolls]).get_buy():
+        buy_text = pixel_font.render("PROPERTY SOLD", True, "black")
+        buy_pos = (117, 515)
+
+    elif all_spaces.sprites()[rolls].get_cost() != 0:
         property_price = all_spaces.sprites()[rolls].get_cost()
         buy_text = pixel_font.render("Buy Property: $" + str(property_price), True, "black")
         buy_pos = (105, 515)
+    
     else:
         property_price = 0
         buy_text = pixel_font.render("Can't Buy", True, 'black')
         buy_pos = (140, 515)
 
+    for color, locs in zip(sets.keys(), sets.values()):
+        if names[rolls] in locs:
+            setbonuses = set_bonus[color]
     # Update sprites
     all_sprites.update(dt)
 
