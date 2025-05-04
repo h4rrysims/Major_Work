@@ -638,10 +638,7 @@ while running:
         property_price = 0
         buy_text = pixel_font.render("Can't Buy", True, 'black')
         buy_pos = (140, 515)
-
-    for color, locs in zip(sets.keys(), sets.values()):
-        if names[rolls] in locs:
-            setbonuses = set_bonus[color]
+        
     # Update sprites
     all_sprites.update(dt)
 
