@@ -217,6 +217,8 @@ class Space(pygame.sprite.Sprite):
                     if self.name in locs:
                          setbonus = set_bonus[color]
                          break
+                    else:
+                        setbonus = 50
                 set_bonus_text = pixel_font.render("Set Bonus: " + str(setbonus) , True, 0)
                 pygame.draw.rect(screen, (170 , 170, 170), [20, 120, 250, 220])
                 screen.blit(property_name, (30, 130))
