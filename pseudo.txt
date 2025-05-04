@@ -1,0 +1,20 @@
+#game board pseudo code
+spots = [list of sqaure sprites]
+spots_rect = [list of square locations]
+for sprite, rect in spots, spots_rect:
+    draw(sprite, rect)
+
+#interactive buttons pseudo code
+while running:
+    if event.type == MOUSEBUTTONDOWN
+        if button_area.collide():
+            click_button()
+
+#currency pseudo code
+Influence_points = 1500
+while game_running:
+    if buying_property:
+        Influence_points -= property_cost
+
+    if passing_go:
+        Influence_points += 200
