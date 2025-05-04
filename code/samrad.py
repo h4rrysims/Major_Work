@@ -391,9 +391,6 @@ def variable_setup():
             "purple": ["Curl Curl", "Freshy"],
             "turquoise": ["Manly"]
             }
-    
-
-
     set_bonus = {
                 "brown": 5,
                 "blue": 15,
@@ -403,7 +400,7 @@ def variable_setup():
                 "gold": 65,
                 "purple": 70,
                 "turquoise": 75
-    }
+                }
     
     go_surf = pygame.image.load(join("images", "spaces", "go.png")).convert_alpha()
     go_rect = go_surf.get_rect(topleft=(288, 10))
@@ -638,7 +635,6 @@ while running:
         property_price = 0
         buy_text = pixel_font.render("Can't Buy", True, 'black')
         buy_pos = (140, 515)
-        
     # Update sprites
     all_sprites.update(dt)
 
