@@ -178,7 +178,7 @@ class Space(pygame.sprite.Sprite):
         self.parties = ['Greens', 'Liberals', 'Labor']
 
     def get_position(self):
-        return self.postion
+        return self.position
 
     def set_buy(self, is_bought):
         self.bought = is_bought
