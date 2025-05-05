@@ -150,6 +150,8 @@ FREE_VOTES_SQUARE_1 = 6
 FREE_VOTES_SQUARE_2 = 23
 GO_SQUARE = 0
 go_passes = 0
+times_passed_go = 0
+
 pygame.display.set_caption("Politician Monopoly")
 
 game_over = 0
@@ -186,6 +188,12 @@ class Space(pygame.sprite.Sprite):
     def get_buy(self):
         return self.bought
 
+    def get_party(self):
+        return self.party
+
+    def set_party(self, party):
+        self.party = party
+
     def get_cost(self):
         return self.cost
     
@@ -196,7 +204,10 @@ class Space(pygame.sprite.Sprite):
         for i in range(len(self.parties)):
             if party == self.parties[i]:
                 if self.party == party_colour: 
-                    screen.blit(self.font, (1000, self.text_pos))     
+                    screen.blit(self.font, (1000, self.text_pos))  
+        
+        if self.party == party_colour:
+            self.bought = False
 
         if self.number in [1, 2, 4, 5, 11, 12, 14]:
             screen.blit(self.bold_font, self.party_pos)
@@ -332,11 +343,9 @@ def dice_timer(roll):
         redo = True
         rolls -= 24
         go_passes += 1
-        print(f"Passed GO {go_passes} time(s)")
 
         if go_passes >= 5:
             game_over = True
-            print("Game Over!")
             display_game_over() 
 
     print(rolls, (list(all_spaces.sprites())[rolls % len(all_spaces)]).get_position())
@@ -344,7 +353,6 @@ def dice_timer(roll):
     player.move_to_square((all_spaces_list[rolls % len(all_spaces_list)]).get_position())
 
     roll_button_idx = 0
-
 
 def display_game_over():
     global game_over
@@ -548,8 +556,6 @@ while class_select:
 
     pygame.display.update()
 
-
-
 button_images = [pygame.image.load(f"images/button/roll_button{i}.png") for i in range(2)]
 roll_button_idx = 0
 buy_button_idx = 0
@@ -591,6 +597,7 @@ while running:
     dt = clock.tick(60) / 1000
     influence_text = pixel_font.render("Influence Points: " + str(Influence_points), True, 'black')
     votes_text = pixel_font.render("Votes: " + str(Votes), True, 'black')
+    passed_go_text = pixel_font.render("Times Passed GO: " + str(go_passes), True, 'black')
 
     # Event loops
     for event in pygame.event.get():
@@ -647,6 +654,7 @@ while running:
     screen.blit(button_images[buy_button_idx], buy_button)
     screen.blit(buy_text, buy_pos)
     screen.blit(properites_text, (1000, 15))
+    screen.blit(passed_go_text, (20, 60))
 
     if dice:
         screen.blit(dices[last_roll], dice_rect)
