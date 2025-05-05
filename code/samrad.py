@@ -224,12 +224,11 @@ class Space(pygame.sprite.Sprite):
                 property_name = pixel_font.render(self.name, True, 0)
                 cost_text = pixel_font.render("Property Cost: $"+ str(self.cost), True, 0)
                 ROI_text = pixel_font.render("ROI:", True, 0)
+                setbonus = 0
                 for color, locs in zip(sets.keys(), sets.values()):
                     if self.name in locs:
                          setbonus = set_bonus[color]
                          break
-                    else:
-                        setbonus = 50
                 set_bonus_text = pixel_font.render("Set Bonus: " + str(setbonus) , True, 0)
                 pygame.draw.rect(screen, (170 , 170, 170), [20, 120, 250, 220])
                 screen.blit(property_name, (30, 130))
@@ -398,7 +397,7 @@ def variable_setup():
             "pink": ["Cromer", "Forest"],
             "red": ["Alambie", "Beacon Hill"],
             "gold": ["Sea Forth"],
-            "purple": ["Curl Curl", "Freshy"],
+            "purple": ["Curly", "Freshy"],
             "turquoise": ["Manly"]
             }
     set_bonus = {
