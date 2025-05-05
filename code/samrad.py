@@ -224,12 +224,11 @@ class Space(pygame.sprite.Sprite):
                 property_name = pixel_font.render(self.name, True, 0)
                 cost_text = pixel_font.render("Property Cost: $"+ str(self.cost), True, 0)
                 ROI_text = pixel_font.render("ROI:", True, 0)
+                setbonus = 0
                 for color, locs in zip(sets.keys(), sets.values()):
                     if self.name in locs:
                          setbonus = set_bonus[color]
                          break
-                    else:
-                        setbonus = 50
                 set_bonus_text = pixel_font.render("Set Bonus: " + str(setbonus) , True, 0)
                 pygame.draw.rect(screen, (170 , 170, 170), [20, 120, 250, 220])
                 screen.blit(property_name, (30, 130))
@@ -238,13 +237,14 @@ class Space(pygame.sprite.Sprite):
                 screen.blit(set_bonus_text, (30, 190))
 
 class AnimatedDice(pygame.sprite.Sprite):
-    def __init__(self, frames, pos, groups, dice_timer, roll_index):
+    def __init__(self, frames, pos, groups, dice_timer, roll_amnt =- 1):
         super().__init__(groups)
         self.frames = frames
         self.frame_index = 0
         self.image = self.frames[self.frame_index]
         self.rect = self.image.get_frect(center=pos)
         self.dice_timer = dice_timer
+        self.roll_amnt = roll_amnt
 
     def update(self, dt):
         self.frame_index += 9 * dt 
@@ -256,8 +256,10 @@ class AnimatedDice(pygame.sprite.Sprite):
         
         else:
             self.kill()
-            roll = random.randint(0, 5)
-            self.dice_timer(roll) 
+            if self.roll_amnt == -1:
+                self.roll_amnt = random.randint(0, 5)
+
+            self.dice_timer(self.roll_amnt) 
             
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups, hat):
@@ -333,7 +335,7 @@ class Player(pygame.sprite.Sprite):
         self.traveling = True
         
 def dice_timer(roll):
-    global dice_rolling, dice, last_roll, rolls, redo, roll_button_idx, go_passes, game_over
+    global dice_rolling, dice, last_roll, rolls, redo, roll_button_idx, go_passes, game_over, Influence_points, Votes
     dice_rolling = True
     dice = True
     last_roll = roll
@@ -343,10 +345,18 @@ def dice_timer(roll):
         redo = True
         rolls -= 24
         go_passes += 1
-
-        if go_passes >= 5:
-            game_over = True
-            display_game_over() 
+    if rolls == 12:
+        go_passes += 1
+    if rolls == 18:
+        if go_passes == 0:
+            Influence_points += 100
+        else:
+            go_passes -= 1
+    if rolls == 6:
+        Votes += 20     
+    if go_passes >= 5:
+        game_over = True
+        display_game_over() 
 
     print(rolls, (list(all_spaces.sprites())[rolls % len(all_spaces)]).get_position())
     all_spaces_list = all_spaces.sprites()
@@ -372,12 +382,15 @@ def display_game_over():
         screen.blit(text2, text_rect2)
         
         pygame.display.flip() 
-        pygame.time.wait(5000)  
-        pygame.quit()  
-        exit()  
+        running = True
+        while running:
+            clock.tick(60)
 
-    if game_over:
-        display_game_over()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+        pygame.font.quit()            
         pygame.quit()
         exit()
 
@@ -398,7 +411,7 @@ def variable_setup():
             "pink": ["Cromer", "Forest"],
             "red": ["Alambie", "Beacon Hill"],
             "gold": ["Sea Forth"],
-            "purple": ["Curl Curl", "Freshy"],
+            "purple": ["Curly", "Freshy"],
             "turquoise": ["Manly"]
             }
     set_bonus = {
@@ -605,11 +618,34 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        keys = pygame.key.get_pressed()
+        nums = [
+            keys[pygame.K_1],
+            keys[pygame.K_2],
+            keys[pygame.K_3],
+            keys[pygame.K_4],
+            keys[pygame.K_5],
+            keys[pygame.K_6]
+        ]
+
+        if any(nums) and dice_rolling and not player.traveling:
+            dice = False
+            roll = 0
+            for i, n in enumerate(nums):
+                if n:
+                    roll = i
+                    break
+
+            AnimatedDice(
+                roll_frames, middle, all_sprites, dice_timer, roll_amnt=roll
+            )
+            dice_rolling = False
+
         if event.type == pygame.MOUSEBUTTONDOWN and dice_rolling and not player.traveling:
             if roll_button.collidepoint(event.pos):
                 if dice_rolling and not player.traveling:
                     dice = False
-                    AnimatedDice(roll_frames, middle, all_sprites, dice_timer, last_roll)
+                    AnimatedDice(roll_frames, middle, all_sprites, dice_timer)
                     dice_rolling = False
                     roll_button_idx = 1
             if buy_button.collidepoint(event.pos):
@@ -666,6 +702,11 @@ while running:
     all_spaces.update(dt)
 
     pygame.display.update()
+
+    if Influence_points <= 0:
+        game_over = True
+        display_game_over()
+        
 pygame.font.quit()
 pygame.quit()
 exit()
