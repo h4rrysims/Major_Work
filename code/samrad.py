@@ -112,6 +112,9 @@ def show_welcome_screen():
         title = font_small.render("Game made by Aaron, Tom, Harry, Jack, Samrad", True, BLACK)
         screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 25)))
 
+        title = font_small.render("Split was 26.5% Aaron, 26.5% Tom, 17.5% Jack, 16% Harry, 13.5% Samrad", True, BLACK)
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 10)))
+
         continue_button_rect = pygame.Rect(WIDTH // 2 - button_width // 2, HEIGHT // 2 + 20, button_width, button_height)
         pygame.draw.rect(screen, YELLOW, continue_button_rect, border_radius=button_radius)  
         pygame.draw.rect(screen, DARK_BLUE, continue_button_rect, 5, border_radius=button_radius)  
