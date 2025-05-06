@@ -737,7 +737,7 @@ while running:
     all_spaces.draw(screen) 
     all_sprites.draw(screen)
     all_spaces.update(dt)
-    screen.blit(choice_text, (550, 475))
+    screen.blit(choice_text, (20, 80))
     pygame.display.update()
 
     if Influence_points <= 0:
