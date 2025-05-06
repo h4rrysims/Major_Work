@@ -29,7 +29,7 @@ button_height = 60
 button_radius = 30  
 
 
-def show_rules_screen():
+def show_help_screen():
     while True:
         screen.fill(LIGHT_BLUE)  
 
@@ -139,7 +139,7 @@ def show_welcome_screen():
                 if continue_button_rect.collidepoint(event.pos):
                     return  
                 if rules_button_rect.collidepoint(event.pos):
-                    show_rules_screen() 
+                    show_help_screen() 
 
 show_welcome_screen()
 
