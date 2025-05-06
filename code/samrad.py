@@ -110,10 +110,7 @@ def show_welcome_screen():
         screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80)))
 
         title = font_small.render("Game made by Aaron, Tom, Harry, Jack, Samrad", True, BLACK)
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40)))
-
-        title = font_small.render("Aaron and Tom did like 80% of it but still", True, BLACK)
-        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 10)))
+        screen.blit(title, title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 25)))
 
         continue_button_rect = pygame.Rect(WIDTH // 2 - button_width // 2, HEIGHT // 2 + 20, button_width, button_height)
         pygame.draw.rect(screen, YELLOW, continue_button_rect, border_radius=button_radius)  
